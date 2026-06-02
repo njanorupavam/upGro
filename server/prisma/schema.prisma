@@ -57,9 +57,23 @@ model Habit {
   bestStreak    Int     @default(0)
   userId        String
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkIns HabitCheckIn[]
 
   @@index([userId])
+}
+
+model HabitCheckIn {
+  id        String   @id @default(cuid())
+  date      DateTime
+  createdAt DateTime @default(now())
+  habitId   String
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@index([date])
 }
 
 model Goal {
