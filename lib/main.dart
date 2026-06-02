@@ -97,8 +97,19 @@ class DayForgeApp extends ConsumerWidget {
       title: 'DayForge',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F7A8C)),
+        appBarTheme: const AppBarTheme(centerTitle: false),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 44),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
+        ),
+        navigationBarTheme: const NavigationBarThemeData(
+          height: 72,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         ),
         textTheme: GoogleFonts.interTextTheme(),
         useMaterial3: true,
@@ -108,8 +119,19 @@ class DayForgeApp extends ConsumerWidget {
           seedColor: const Color(0xFF1F7A8C),
           brightness: Brightness.dark,
         ),
+        appBarTheme: const AppBarTheme(centerTitle: false),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 44),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
+        ),
+        navigationBarTheme: const NavigationBarThemeData(
+          height: 72,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         ),
         textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
         useMaterial3: true,
@@ -125,9 +147,20 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.auto_awesome,
+              size: 40,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 18),
+            const CircularProgressIndicator(),
+          ],
+        ),
       ),
     );
   }

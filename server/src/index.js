@@ -25,8 +25,12 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'dayforge-api',
-    phase: 8,
+    phase: 9,
   });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route was not found.' });
 });
 
 app.use((err, req, res, next) => {

@@ -52,23 +52,61 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedIndex = _selectedIndex(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('DayForge'),
-      ),
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) => context.go(_items[index].path),
-        destinations: [
-          for (final item in _items)
-            NavigationDestination(
-              icon: Icon(item.icon),
-              selectedIcon: Icon(item.selectedIcon),
-              label: item.label,
-            ),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useRail = constraints.maxWidth >= 900;
+        final body = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          child: KeyedSubtree(
+            key: ValueKey(GoRouterState.of(context).matchedLocation),
+            child: child,
+          ),
+        );
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('DayForge'),
+          ),
+          body: useRail
+              ? Row(
+                  children: [
+                    NavigationRail(
+                      selectedIndex: selectedIndex,
+                      labelType: NavigationRailLabelType.all,
+                      minWidth: 92,
+                      onDestinationSelected: (index) {
+                        context.go(_items[index].path);
+                      },
+                      destinations: [
+                        for (final item in _items)
+                          NavigationRailDestination(
+                            icon: Icon(item.icon),
+                            selectedIcon: Icon(item.selectedIcon),
+                            label: Text(item.label),
+                          ),
+                      ],
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: body),
+                  ],
+                )
+              : body,
+          bottomNavigationBar: useRail
+              ? null
+              : NavigationBar(
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (index) => context.go(_items[index].path),
+                  destinations: [
+                    for (final item in _items)
+                      NavigationDestination(
+                        icon: Icon(item.icon),
+                        selectedIcon: Icon(item.selectedIcon),
+                        label: item.label,
+                      ),
+                  ],
+                ),
+        );
+      },
     );
   }
 
