@@ -5,6 +5,7 @@ const express = require('express');
 dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -12,12 +13,13 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 app.use('/auth', authRoutes);
+app.use('/tasks', taskRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'dayforge-api',
-    phase: 2,
+    phase: 4,
   });
 });
 
