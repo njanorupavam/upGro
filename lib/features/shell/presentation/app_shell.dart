@@ -35,6 +35,12 @@ class AppShell extends StatelessWidget {
       selectedIcon: Icons.flag,
     ),
     ShellNavItem(
+      label: 'Analytics',
+      path: '/analytics',
+      icon: Icons.bar_chart_outlined,
+      selectedIcon: Icons.bar_chart,
+    ),
+    ShellNavItem(
       label: 'Profile',
       path: '/profile',
       icon: Icons.person_outline,

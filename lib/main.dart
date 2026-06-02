@@ -1,3 +1,4 @@
+import 'package:dayforge/features/analytics/presentation/analytics_screen.dart';
 import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dayforge/features/auth/presentation/auth_screens.dart';
 import 'package:dayforge/features/dashboard/presentation/dashboard_screen.dart';
@@ -70,6 +71,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/goals',
             builder: (context, state) => const GoalsScreen(),
+          ),
+          GoRoute(
+            path: '/analytics',
+            builder: (context, state) => const AnalyticsScreen(),
           ),
           GoRoute(
             path: '/profile',
