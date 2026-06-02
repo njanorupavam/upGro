@@ -1,3 +1,4 @@
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,22 +48,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 14),
             TextFormField(
               controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                prefixIcon: Icon(Icons.lock_outline),
-              ).copyWith(
-                suffixIcon: IconButton(
-                  tooltip: _hidePassword ? 'Show password' : 'Hide password',
-                  onPressed: () {
-                    setState(() => _hidePassword = !_hidePassword);
-                  },
-                  icon: Icon(
-                    _hidePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+              decoration:
+                  const InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ).copyWith(
+                    suffixIcon: IconButton(
+                      tooltip: _hidePassword
+                          ? 'Show password'
+                          : 'Hide password',
+                      onPressed: () {
+                        setState(() => _hidePassword = !_hidePassword);
+                      },
+                      icon: Icon(
+                        _hidePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                    ),
                   ),
-                ),
-              ),
               obscureText: _hidePassword,
               validator: _requiredPassword,
             ),
@@ -97,7 +101,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    final success = await ref.read(authControllerProvider).login(
+    final success = await ref
+        .read(authControllerProvider)
+        .login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -163,22 +169,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             const SizedBox(height: 14),
             TextFormField(
               controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                prefixIcon: Icon(Icons.lock_outline),
-              ).copyWith(
-                suffixIcon: IconButton(
-                  tooltip: _hidePassword ? 'Show password' : 'Hide password',
-                  onPressed: () {
-                    setState(() => _hidePassword = !_hidePassword);
-                  },
-                  icon: Icon(
-                    _hidePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+              decoration:
+                  const InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ).copyWith(
+                    suffixIcon: IconButton(
+                      tooltip: _hidePassword
+                          ? 'Show password'
+                          : 'Hide password',
+                      onPressed: () {
+                        setState(() => _hidePassword = !_hidePassword);
+                      },
+                      icon: Icon(
+                        _hidePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                    ),
                   ),
-                ),
-              ),
               obscureText: _hidePassword,
               validator: _requiredPassword,
             ),
@@ -213,7 +222,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
-    final success = await ref.read(authControllerProvider).register(
+    final success = await ref
+        .read(authControllerProvider)
+        .register(
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -240,6 +251,7 @@ class AuthScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: dayforgeCanvas,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -290,30 +302,41 @@ class AuthPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(12),
+    return DayForgeCard(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(
-              Icons.auto_awesome,
-              size: 40,
-              color: Theme.of(context).colorScheme.primary,
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: dayforgeBlue,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.auto_awesome,
+                size: 30,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 18),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: dayforgeInk,
+                fontWeight: FontWeight.w900,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: dayforgeMuted),
             ),
             const SizedBox(height: 28),
             child,
@@ -333,20 +356,48 @@ class BrandPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.auto_awesome,
-          size: 54,
-          color: Theme.of(context).colorScheme.primary,
+        Container(
+          width: 74,
+          height: 74,
+          decoration: BoxDecoration(
+            color: dayforgeBlue,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x353158F6),
+                blurRadius: 30,
+                offset: Offset(0, 14),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.auto_awesome, size: 38, color: Colors.white),
         ),
         const SizedBox(height: 20),
         Text(
           'DayForge',
-          style: Theme.of(context).textTheme.displaySmall,
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+            color: dayforgeInk,
+            fontWeight: FontWeight.w900,
+          ),
         ),
         const SizedBox(height: 12),
         Text(
           'Plan the day, build the habit, finish the goal.',
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(color: dayforgeMuted),
+        ),
+        const SizedBox(height: 24),
+        const DayForgeCard(
+          color: dayforgeBlue,
+          child: Text(
+            'Focus tasks, habits, goals, and progress in one daily loop.',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              height: 1.35,
+            ),
+          ),
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/dashboard/presentation/dashboard_controller.dart';
 import 'package:dayforge/features/goals/data/goal_models.dart';
 import 'package:dayforge/features/habits/data/habit_models.dart';
@@ -16,59 +17,106 @@ class DashboardScreen extends ConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: dashboard.loadDashboard,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Row(
+        child: DayForgePage(
+          title: 'Daily Dashboard',
+          subtitle: _todayLabel(),
+          trailing: IconButton.filledTonal(
+            tooltip: 'Refresh',
+            onPressed: dashboard.loadDashboard,
+            icon: const Icon(Icons.refresh),
+          ),
+          child: dashboard.isLoading
+              ? const SizedBox(
+                  height: 420,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Dashboard',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                    if (dashboard.errorMessage != null) ...[
+                      Text(
+                        dashboard.errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Refresh',
-                      onPressed: dashboard.loadDashboard,
-                      icon: const Icon(Icons.refresh),
-                    ),
+                      const SizedBox(height: 12),
+                    ],
+                    HeroFocusCard(controller: dashboard),
+                    const SizedBox(height: 16),
+                    DashboardMetrics(controller: dashboard),
+                    const SizedBox(height: 16),
+                    TodayTasksCard(tasks: dashboard.todaysTasks),
+                    const SizedBox(height: 16),
+                    ActiveHabitsCard(habits: dashboard.activeHabits),
+                    const SizedBox(height: 16),
+                    GoalProgressCard(goals: dashboard.goals),
                   ],
                 ),
-              ),
-            ),
-            if (dashboard.errorMessage != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    dashboard.errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
-              ),
-            if (dashboard.isLoading)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    DashboardMetrics(controller: dashboard),
-                    const SizedBox(height: 14),
-                    TodayTasksCard(tasks: dashboard.todaysTasks),
-                    const SizedBox(height: 14),
-                    ActiveHabitsCard(habits: dashboard.activeHabits),
-                    const SizedBox(height: 14),
-                    GoalProgressCard(goals: dashboard.goals),
-                  ]),
-                ),
-              ),
-          ],
         ),
+      ),
+    );
+  }
+}
+
+class HeroFocusCard extends StatelessWidget {
+  const HeroFocusCard({required this.controller, super.key});
+
+  final DashboardController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final taskTarget =
+        controller.pendingTaskCount + controller.completedTaskCount;
+    final completion = taskTarget == 0
+        ? 0.0
+        : controller.completedTaskCount / taskTarget.clamp(1, 999);
+
+    return DayForgeCard(
+      color: dayforgeBlue,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const DayForgeBadge(
+                'Today focus',
+                color: Color(0x2BFFFFFF),
+                textColor: Colors.white,
+              ),
+              const Spacer(),
+              const Icon(Icons.bolt, color: Colors.white),
+            ],
+          ),
+          const SizedBox(height: 22),
+          Text(
+            controller.todaysTasks.isEmpty
+                ? 'Build a calm, useful day'
+                : controller.todaysTasks.first.title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tasks, habits, and goals are ready in one flow.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.82),
+            ),
+          ),
+          const SizedBox(height: 18),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              minHeight: 8,
+              value: completion,
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -105,7 +153,8 @@ class DashboardMetrics extends StatelessWidget {
             MetricCard(
               icon: Icons.repeat,
               label: 'Habits today',
-              value: '${controller.completedHabitCount}/${controller.habits.length}',
+              value:
+                  '${controller.completedHabitCount}/${controller.habits.length}',
             ),
             MetricCard(
               icon: Icons.flag,
@@ -133,18 +182,28 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(8),
+    return DayForgeCard(
+      padding: const EdgeInsets.all(14),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
+            IconBubble(icon: icon),
             const Spacer(),
-            Text(value, style: Theme.of(context).textTheme.headlineSmall),
-            Text(label, style: Theme.of(context).textTheme.labelMedium),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: dayforgeInk,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: dayforgeMuted),
+            ),
           ],
         ),
       ),
@@ -160,7 +219,7 @@ class TodayTasksCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DashboardCard(
-      title: "Today's tasks",
+      title: "Today's Plan",
       actionLabel: 'Open tasks',
       onAction: () => context.go('/tasks'),
       child: tasks.isEmpty
@@ -192,7 +251,7 @@ class ActiveHabitsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DashboardCard(
-      title: 'Active habits',
+      title: 'Upcoming Habits',
       actionLabel: 'Open habits',
       onAction: () => context.go('/habits'),
       child: habits.isEmpty
@@ -226,7 +285,7 @@ class GoalProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DashboardCard(
-      title: 'Goal progress',
+      title: 'Progress Flow',
       actionLabel: 'Open goals',
       onAction: () => context.go('/goals'),
       child: goals.isEmpty
@@ -242,7 +301,13 @@ class GoalProgressCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  LinearProgressIndicator(value: goal.progress / 100),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      minHeight: 8,
+                      value: goal.progress / 100,
+                    ),
+                  ),
                   const SizedBox(height: 14),
                 ],
               ],
@@ -267,11 +332,9 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(8),
+    return DayForgeCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -283,10 +346,7 @@ class DashboardCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                TextButton(
-                  onPressed: onAction,
-                  child: Text(actionLabel),
-                ),
+                TextButton(onPressed: onAction, child: Text(actionLabel)),
               ],
             ),
             const SizedBox(height: 8),
@@ -296,6 +356,25 @@ class DashboardCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _todayLabel() {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  final now = DateTime.now();
+  return '${months[now.month - 1]} ${now.day}, ${now.year}';
 }
 
 class EmptyDashboardText extends StatelessWidget {

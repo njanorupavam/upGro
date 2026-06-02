@@ -1,3 +1,4 @@
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/goals/data/goal_models.dart';
 import 'package:dayforge/features/goals/presentation/goals_controller.dart';
 import 'package:flutter/material.dart';
@@ -13,65 +14,48 @@ class GoalsScreen extends ConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: controller.loadGoals,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Row(
+        child: DayForgePage(
+          title: 'Goal Studio',
+          subtitle: 'Track outcomes without losing the day.',
+          action: FilledButton.icon(
+            onPressed: controller.isSaving
+                ? null
+                : () => _openGoalDialog(context),
+            icon: const Icon(Icons.add),
+            label: const Text('New'),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (controller.errorMessage != null) ...[
+                Text(
+                  controller.errorMessage!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (controller.isLoading)
+                const SizedBox(
+                  height: 360,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (controller.goals.isEmpty)
+                const DayForgeCard(child: Text('No goals yet.'))
+              else
+                Column(
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Goals',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                    for (final goal in controller.goals) ...[
+                      GoalTile(
+                        goal: goal,
+                        onEdit: () => _openGoalDialog(context, goal: goal),
+                        onDelete: () => _deleteGoal(context, controller, goal),
                       ),
-                    ),
-                    FilledButton.icon(
-                      onPressed: controller.isSaving
-                          ? null
-                          : () => _openGoalDialog(context),
-                      icon: const Icon(Icons.add),
-                      label: const Text('New goal'),
-                    ),
+                      const SizedBox(height: 10),
+                    ],
                   ],
                 ),
-              ),
-            ),
-            if (controller.errorMessage != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    controller.errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
-              ),
-            if (controller.isLoading)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (controller.goals.isEmpty)
-              const SliverFillRemaining(
-                child: Center(child: Text('No goals yet.')),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                sliver: SliverList.separated(
-                  itemCount: controller.goals.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final goal = controller.goals[index];
-                    return GoalTile(
-                      goal: goal,
-                      onEdit: () => _openGoalDialog(context, goal: goal),
-                      onDelete: () => _deleteGoal(context, controller, goal),
-                    );
-                  },
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -133,11 +117,9 @@ class GoalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = goal.progress / 100;
 
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(8),
+    return DayForgeCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -150,11 +132,20 @@ class GoalTile extends StatelessWidget {
                     children: [
                       Text(
                         goal.title,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: dayforgeInk,
+                              fontWeight: FontWeight.w800,
+                            ),
                       ),
                       if (goal.description != null) ...[
                         const SizedBox(height: 4),
-                        Text(goal.description!),
+                        Text(
+                          goal.description!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: dayforgeMuted),
+                        ),
                       ],
                     ],
                   ),
@@ -172,14 +163,27 @@ class GoalTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            LinearProgressIndicator(value: progress),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 9,
+                value: progress,
+                backgroundColor: dayforgeSoftBlue,
+                valueColor: const AlwaysStoppedAnimation<Color>(dayforgeBlue),
+              ),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Text('${goal.progress}% complete'),
+                DayForgeBadge('${goal.progress}% complete'),
                 const Spacer(),
                 if (goal.targetDate != null)
-                  Text('Target ${_formatDate(goal.targetDate!)}'),
+                  Text(
+                    'Target ${_formatDate(goal.targetDate!)}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(color: dayforgeMuted),
+                  ),
               ],
             ),
           ],
@@ -210,7 +214,9 @@ class _GoalFormDialogState extends ConsumerState<GoalFormDialog> {
     super.initState();
     final goal = widget.goal;
     _titleController = TextEditingController(text: goal?.title ?? '');
-    _descriptionController = TextEditingController(text: goal?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: goal?.description ?? '',
+    );
     _progress = goal?.progress ?? 0;
     _targetDate = goal?.targetDate;
   }
@@ -295,7 +301,9 @@ class _GoalFormDialogState extends ConsumerState<GoalFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: controller.isSaving ? null : () => Navigator.of(context).pop(),
+          onPressed: controller.isSaving
+              ? null
+              : () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         FilledButton(

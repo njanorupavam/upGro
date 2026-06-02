@@ -1,6 +1,7 @@
 import 'package:dayforge/features/analytics/presentation/analytics_screen.dart';
 import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dayforge/features/auth/presentation/auth_screens.dart';
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:dayforge/features/goals/presentation/goals_screen.dart';
 import 'package:dayforge/features/habits/presentation/habits_screen.dart';
@@ -27,7 +28,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return state.matchedLocation == '/loading' ? null : '/loading';
       }
 
-      final isAuthRoute = state.matchedLocation == '/login' ||
+      final isAuthRoute =
+          state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
 
       if (!auth.isAuthenticated) {
@@ -45,10 +47,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/loading',
         builder: (context, state) => const LoadingScreen(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
@@ -96,35 +95,77 @@ class DayForgeApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'DayForge',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F7A8C)),
-        appBarTheme: const AppBarTheme(centerTitle: false),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: dayforgeBlue,
+          primary: dayforgeBlue,
+          surface: dayforgeCanvas,
+          surfaceContainerHighest: dayforgeCard,
+        ),
+        scaffoldBackgroundColor: dayforgeCanvas,
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          backgroundColor: dayforgeCanvas,
+          foregroundColor: dayforgeInk,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+        ),
         cardTheme: const CardThemeData(
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
         ),
         chipTheme: const ChipThemeData(
+          backgroundColor: dayforgeCard,
+          selectedColor: dayforgeSoftBlue,
+          labelStyle: TextStyle(fontWeight: FontWeight.w700),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderRadius: BorderRadius.all(Radius.circular(999)),
           ),
         ),
         dialogTheme: const DialogThemeData(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderRadius: BorderRadius.all(Radius.circular(18)),
           ),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            minimumSize: const Size(0, 44),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: dayforgeBlue,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(0, 46),
+            textStyle: const TextStyle(fontWeight: FontWeight.w800),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: dayforgeBlue,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFF3F6FF),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: dayforgeBlue, width: 1.5),
+          ),
         ),
         navigationBarTheme: const NavigationBarThemeData(
-          height: 72,
+          backgroundColor: dayforgeCard,
+          indicatorColor: dayforgeBlue,
+          height: 76,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         ),
         textTheme: GoogleFonts.interTextTheme(),
@@ -155,7 +196,9 @@ class DayForgeApp extends ConsumerWidget {
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             minimumSize: const Size(0, 44),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
         inputDecorationTheme: const InputDecorationTheme(
@@ -168,7 +211,7 @@ class DayForgeApp extends ConsumerWidget {
         textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

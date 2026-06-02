@@ -1,11 +1,9 @@
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class AppShell extends StatelessWidget {
-  const AppShell({
-    required this.child,
-    super.key,
-  });
+  const AppShell({required this.child, super.key});
 
   final Widget child;
 
@@ -66,14 +64,32 @@ class AppShell extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
+            toolbarHeight: 62,
             title: Row(
               children: [
-                const Text('DayForge'),
-                const SizedBox(width: 12),
-                Text(
-                  selectedItem.label,
-                  style: Theme.of(context).textTheme.titleMedium,
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: dayforgeBlue,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    size: 19,
+                    color: Colors.white,
+                  ),
                 ),
+                const SizedBox(width: 10),
+                Text(
+                  'DayForge',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: dayforgeInk,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                DayForgeBadge(selectedItem.label),
               ],
             ),
           ),
@@ -81,6 +97,7 @@ class AppShell extends StatelessWidget {
               ? Row(
                   children: [
                     NavigationRail(
+                      backgroundColor: dayforgeCanvas,
                       selectedIndex: selectedIndex,
                       labelType: NavigationRailLabelType.all,
                       minWidth: 92,
@@ -96,7 +113,7 @@ class AppShell extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const VerticalDivider(width: 1),
+                    const VerticalDivider(width: 1, color: Color(0xFFE4E9F7)),
                     Expanded(child: body),
                   ],
                 )
@@ -105,7 +122,8 @@ class AppShell extends StatelessWidget {
               ? null
               : NavigationBar(
                   selectedIndex: selectedIndex,
-                  onDestinationSelected: (index) => context.go(_items[index].path),
+                  onDestinationSelected: (index) =>
+                      context.go(_items[index].path),
                   destinations: [
                     for (final item in _items)
                       NavigationDestination(

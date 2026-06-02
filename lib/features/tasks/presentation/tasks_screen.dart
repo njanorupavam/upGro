@@ -1,3 +1,4 @@
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/tasks/data/task_models.dart';
 import 'package:dayforge/features/tasks/presentation/tasks_controller.dart';
 import 'package:flutter/material.dart';
@@ -13,78 +14,59 @@ class TasksScreen extends ConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: controller.loadTasks,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: DayForgePage(
+          title: 'Daily Planner',
+          subtitle: 'Turn your focus into a clear list.',
+          action: FilledButton.icon(
+            onPressed: controller.isSaving
+                ? null
+                : () => _openTaskDialog(context, ref),
+            icon: const Icon(Icons.add),
+            label: const Text('New'),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TaskFilters(controller: controller),
+              if (controller.errorMessage != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  controller.errorMessage!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+              const SizedBox(height: 16),
+              if (controller.isLoading)
+                const SizedBox(
+                  height: 360,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (controller.tasks.isEmpty)
+                const DayForgeCard(
+                  child: Text('No tasks match the current filters.'),
+                )
+              else
+                Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Tasks',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        ),
-                        FilledButton.icon(
-                          onPressed: controller.isSaving
-                              ? null
-                              : () => _openTaskDialog(context, ref),
-                          icon: const Icon(Icons.add),
-                          label: const Text('New task'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TaskFilters(controller: controller),
-                    if (controller.errorMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        controller.errorMessage!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+                    for (final task in controller.tasks) ...[
+                      TaskTile(
+                        task: task,
+                        onToggleComplete: () => controller.toggleComplete(task),
+                        onEdit: () => _openTaskDialog(context, ref, task: task),
+                        onDelete: () => _deleteTask(context, controller, task),
                       ),
+                      const SizedBox(height: 10),
                     ],
                   ],
                 ),
-              ),
-            ),
-            if (controller.isLoading)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (controller.tasks.isEmpty)
-              const SliverFillRemaining(
-                child: Center(
-                  child: Text('No tasks match the current filters.'),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                sliver: SliverList.separated(
-                  itemCount: controller.tasks.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final task = controller.tasks[index];
-                    return TaskTile(
-                      task: task,
-                      onToggleComplete: () => controller.toggleComplete(task),
-                      onEdit: () => _openTaskDialog(context, ref, task: task),
-                      onDelete: () => _deleteTask(context, controller, task),
-                    );
-                  },
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: controller.isSaving ? null : () => _openTaskDialog(context, ref),
+        onPressed: controller.isSaving
+            ? null
+            : () => _openTaskDialog(context, ref),
         child: const Icon(Icons.add),
       ),
     );
@@ -187,54 +169,66 @@ class TaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isComplete = task.status == TaskStatus.completed;
 
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(8),
-      child: ListTile(
-        leading: IconButton(
-          tooltip: isComplete ? 'Mark incomplete' : 'Mark complete',
-          onPressed: onToggleComplete,
-          icon: Icon(
-            isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+    return DayForgeCard(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IconButton(
+            tooltip: isComplete ? 'Mark incomplete' : 'Mark complete',
+            onPressed: onToggleComplete,
+            icon: Icon(
+              isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: isComplete ? dayforgeGreen : dayforgeMuted,
+            ),
           ),
-        ),
-        title: Text(
-          task.title,
-          style: TextStyle(
-            decoration: isComplete ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (task.description != null) Text(task.description!),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
+          const SizedBox(width: 4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TaskBadge(task.status.label),
-                TaskBadge(task.priority.label),
-                if (task.dueDate != null) TaskBadge(_formatDate(task.dueDate!)),
+                Text(
+                  task.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: dayforgeInk,
+                    fontWeight: FontWeight.w800,
+                    decoration: isComplete ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                if (task.description != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    task.description!,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: dayforgeMuted),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    TaskBadge(task.status.label),
+                    TaskBadge(task.priority.label),
+                    if (task.dueDate != null)
+                      TaskBadge(_formatDate(task.dueDate!)),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-        trailing: Wrap(
-          spacing: 4,
-          children: [
-            IconButton(
-              tooltip: 'Edit task',
-              onPressed: onEdit,
-              icon: const Icon(Icons.edit_outlined),
-            ),
-            IconButton(
-              tooltip: 'Delete task',
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline),
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            tooltip: 'Edit task',
+            onPressed: onEdit,
+            icon: const Icon(Icons.edit_outlined),
+          ),
+          IconButton(
+            tooltip: 'Delete task',
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline),
+          ),
+        ],
       ),
     );
   }
@@ -247,16 +241,7 @@ class TaskBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        child: Text(label, style: Theme.of(context).textTheme.labelSmall),
-      ),
-    );
+    return DayForgeBadge(label);
   }
 }
 
@@ -282,7 +267,9 @@ class _TaskFormDialogState extends ConsumerState<TaskFormDialog> {
     super.initState();
     final task = widget.task;
     _titleController = TextEditingController(text: task?.title ?? '');
-    _descriptionController = TextEditingController(text: task?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: task?.description ?? '',
+    );
     _priority = task?.priority ?? TaskPriority.medium;
     _status = task?.status ?? TaskStatus.todo;
     _dueDate = task?.dueDate;
@@ -381,7 +368,9 @@ class _TaskFormDialogState extends ConsumerState<TaskFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: controller.isSaving ? null : () => Navigator.of(context).pop(),
+          onPressed: controller.isSaving
+              ? null
+              : () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         FilledButton(

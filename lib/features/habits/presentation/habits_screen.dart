@@ -1,3 +1,4 @@
+import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/habits/data/habit_models.dart';
 import 'package:dayforge/features/habits/presentation/habits_controller.dart';
 import 'package:flutter/material.dart';
@@ -13,68 +14,54 @@ class HabitsScreen extends ConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: controller.loadHabits,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Row(
+        child: DayForgePage(
+          title: 'Habit Tracker',
+          subtitle: 'Keep the routine small and visible.',
+          action: FilledButton.icon(
+            onPressed: controller.isSaving
+                ? null
+                : () => _openHabitDialog(context),
+            icon: const Icon(Icons.add),
+            label: const Text('New'),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (controller.errorMessage != null) ...[
+                Text(
+                  controller.errorMessage!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                const SizedBox(height: 12),
+              ],
+              HabitWeekStrip(habits: controller.habits),
+              const SizedBox(height: 16),
+              if (controller.isLoading)
+                const SizedBox(
+                  height: 360,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (controller.habits.isEmpty)
+                const DayForgeCard(child: Text('No habits yet.'))
+              else
+                Column(
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Habits',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                    for (final habit in controller.habits) ...[
+                      HabitTile(
+                        habit: habit,
+                        onCheckIn: habit.checkedInToday
+                            ? null
+                            : () => controller.checkIn(habit.id),
+                        onEdit: () => _openHabitDialog(context, habit: habit),
+                        onDelete: () =>
+                            _deleteHabit(context, controller, habit),
                       ),
-                    ),
-                    FilledButton.icon(
-                      onPressed: controller.isSaving
-                          ? null
-                          : () => _openHabitDialog(context),
-                      icon: const Icon(Icons.add),
-                      label: const Text('New habit'),
-                    ),
+                      const SizedBox(height: 10),
+                    ],
                   ],
                 ),
-              ),
-            ),
-            if (controller.errorMessage != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    controller.errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
-              ),
-            if (controller.isLoading)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (controller.habits.isEmpty)
-              const SliverFillRemaining(
-                child: Center(child: Text('No habits yet.')),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                sliver: SliverList.separated(
-                  itemCount: controller.habits.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final habit = controller.habits[index];
-                    return HabitTile(
-                      habit: habit,
-                      onCheckIn: habit.checkedInToday
-                          ? null
-                          : () => controller.checkIn(habit.id),
-                      onEdit: () => _openHabitDialog(context, habit: habit),
-                      onDelete: () => _deleteHabit(context, controller, habit),
-                    );
-                  },
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -84,7 +71,10 @@ class HabitsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openHabitDialog(BuildContext context, {HabitItem? habit}) async {
+  Future<void> _openHabitDialog(
+    BuildContext context, {
+    HabitItem? habit,
+  }) async {
     await showDialog<void>(
       context: context,
       builder: (context) => HabitFormDialog(habit: habit),
@@ -120,6 +110,50 @@ class HabitsScreen extends ConsumerWidget {
   }
 }
 
+class HabitWeekStrip extends StatelessWidget {
+  const HabitWeekStrip({required this.habits, super.key});
+
+  final List<HabitItem> habits;
+
+  @override
+  Widget build(BuildContext context) {
+    final completed = habits.where((habit) => habit.checkedInToday).length;
+    final ratio = habits.isEmpty ? 0.0 : completed / habits.length;
+
+    return DayForgeCard(
+      color: dayforgeBlue,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const DayForgeBadge(
+            'Daily goal',
+            color: Color(0x2BFFFFFF),
+            textColor: Colors.white,
+          ),
+          const SizedBox(height: 14),
+          Text(
+            '$completed of ${habits.length} completed',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              minHeight: 8,
+              value: ratio,
+              backgroundColor: Colors.white.withValues(alpha: 0.24),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class HabitTile extends StatelessWidget {
   const HabitTile({
     required this.habit,
@@ -136,11 +170,9 @@ class HabitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(8),
+    return DayForgeCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -153,11 +185,20 @@ class HabitTile extends StatelessWidget {
                     children: [
                       Text(
                         habit.title,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: dayforgeInk,
+                              fontWeight: FontWeight.w800,
+                            ),
                       ),
                       if (habit.description != null) ...[
                         const SizedBox(height: 4),
-                        Text(habit.description!),
+                        Text(
+                          habit.description!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: dayforgeMuted),
+                        ),
                       ],
                     ],
                   ),
@@ -184,9 +225,7 @@ class HabitTile extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onCheckIn,
                   icon: Icon(
-                    habit.checkedInToday
-                        ? Icons.check_circle
-                        : Icons.add_task,
+                    habit.checkedInToday ? Icons.check_circle : Icons.add_task,
                   ),
                   label: Text(habit.checkedInToday ? 'Done today' : 'Check in'),
                 ),
@@ -205,10 +244,12 @@ class HabitTile extends StatelessWidget {
                           height: 28,
                           decoration: BoxDecoration(
                             color: day.completed
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.surface,
+                                ? dayforgeGreen
+                                : dayforgeSoftBlue,
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.outlineVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outlineVariant,
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -226,11 +267,7 @@ class HabitTile extends StatelessWidget {
 }
 
 class HabitStat extends StatelessWidget {
-  const HabitStat({
-    required this.label,
-    required this.value,
-    super.key,
-  });
+  const HabitStat({required this.label, required this.value, super.key});
 
   final String label;
   final int value;
@@ -240,8 +277,19 @@ class HabitStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelSmall),
-        Text('$value', style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: dayforgeMuted),
+        ),
+        Text(
+          '$value',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: dayforgeInk,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
       ],
     );
   }
@@ -283,7 +331,7 @@ class _HabitFormDialogState extends ConsumerState<HabitFormDialog> {
     final isEditing = widget.habit != null;
 
     return AlertDialog(
-      title: Text(isEditing ? 'Edit habit' : 'Create habit'),
+      title: Text(isEditing ? 'Edit habit' : 'Create Habit'),
       content: Form(
         key: _formKey,
         child: SizedBox(
@@ -314,7 +362,9 @@ class _HabitFormDialogState extends ConsumerState<HabitFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: controller.isSaving ? null : () => Navigator.of(context).pop(),
+          onPressed: controller.isSaving
+              ? null
+              : () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         FilledButton(
