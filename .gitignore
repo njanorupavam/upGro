@@ -47,3 +47,4 @@ app.*.map.json
 # Backend
 server/node_modules/
 server/.env
+server/generated/
