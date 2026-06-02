@@ -4,18 +4,26 @@ const express = require('express');
 
 dotenv.config();
 
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
 const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/auth', authRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'dayforge-api',
-    phase: 0,
+    phase: 2,
   });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: 'Something went wrong.' });
 });
 
 app.listen(port, () => {
