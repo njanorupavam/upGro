@@ -199,59 +199,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
-class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authControllerProvider);
-    final user = auth.user;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('DayForge'),
-        actions: [
-          IconButton(
-            tooltip: 'Sign out',
-            onPressed: () async {
-              await ref.read(authControllerProvider).logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Profile',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 20),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.person_outline),
-                  title: Text(user?.name ?? 'Loading'),
-                  subtitle: Text(user?.email ?? ''),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
     required this.title,

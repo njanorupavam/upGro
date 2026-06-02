@@ -1,5 +1,11 @@
 import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dayforge/features/auth/presentation/auth_screens.dart';
+import 'package:dayforge/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:dayforge/features/goals/presentation/goals_screen.dart';
+import 'package:dayforge/features/habits/presentation/habits_screen.dart';
+import 'package:dayforge/features/profile/presentation/profile_screen.dart';
+import 'package:dayforge/features/shell/presentation/app_shell.dart';
+import 'package:dayforge/features/tasks/presentation/tasks_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +34,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (isAuthRoute || state.matchedLocation == '/loading') {
-        return '/profile';
+        return '/dashboard';
       }
 
       return null;
@@ -46,9 +52,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(
-        path: '/profile',
-        builder: (context, state) => const ProfileScreen(),
+      ShellRoute(
+        builder: (context, state, child) => AppShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/dashboard',
+            builder: (context, state) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: '/tasks',
+            builder: (context, state) => const TasksScreen(),
+          ),
+          GoRoute(
+            path: '/habits',
+            builder: (context, state) => const HabitsScreen(),
+          ),
+          GoRoute(
+            path: '/goals',
+            builder: (context, state) => const GoalsScreen(),
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
       ),
     ],
   );
@@ -71,6 +98,18 @@ class DayForgeApp extends ConsumerWidget {
         textTheme: GoogleFonts.interTextTheme(),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1F7A8C),
+          brightness: Brightness.dark,
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
+        ),
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.dark,
       routerConfig: router,
     );
   }
