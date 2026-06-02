@@ -51,6 +51,7 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = _selectedIndex(context);
+    final selectedItem = _items[selectedIndex];
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -65,7 +66,16 @@ class AppShell extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('DayForge'),
+            title: Row(
+              children: [
+                const Text('DayForge'),
+                const SizedBox(width: 12),
+                Text(
+                  selectedItem.label,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
           ),
           body: useRail
               ? Row(

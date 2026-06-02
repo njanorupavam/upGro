@@ -98,6 +98,22 @@ class DayForgeApp extends ConsumerWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F7A8C)),
         appBarTheme: const AppBarTheme(centerTitle: false),
+        cardTheme: const CardThemeData(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        chipTheme: const ChipThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        dialogTheme: const DialogThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+        ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             minimumSize: const Size(0, 44),
@@ -120,6 +136,22 @@ class DayForgeApp extends ConsumerWidget {
           brightness: Brightness.dark,
         ),
         appBarTheme: const AppBarTheme(centerTitle: false),
+        cardTheme: const CardThemeData(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        chipTheme: const ChipThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        dialogTheme: const DialogThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+        ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             minimumSize: const Size(0, 44),

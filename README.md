@@ -1,17 +1,66 @@
-# dayforge
+# DayForge
 
-A new Flutter project.
+DayForge is a personal productivity operating system built with Flutter, Express, Prisma, and Supabase PostgreSQL.
 
-## Getting Started
+## Current MVP Progress
 
-This project is a starting point for a Flutter application.
+- Authentication with JWT
+- Task management
+- Habit tracking with streaks
+- Goal tracking with progress
+- Dashboard summaries
+- Analytics charts
+- Responsive Material 3 app shell
 
-A few resources to get you started if this is your first Flutter project:
+## Local URLs
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Frontend preview: `http://127.0.0.1:5173`
+- Backend API: `http://127.0.0.1:4000`
+- Backend health: `http://127.0.0.1:4000/health`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Frontend
+
+```powershell
+D:\workstuff\devtools\flutter\bin\flutter.bat build web --no-wasm-dry-run
+```
+
+The checked-in static preview helper serves `build/web`:
+
+```powershell
+cd D:\workstuff\Projects\Web\dayforge
+node server/static-web.js
+```
+
+## Backend
+
+```powershell
+cd D:\workstuff\Projects\Web\dayforge\server
+npm start
+```
+
+Required local environment variables live in `server/.env`, which is intentionally ignored by Git.
+
+```env
+DATABASE_URL="..."
+DIRECT_URL="..."
+JWT_SECRET="..."
+```
+
+## Phase Roadmap
+
+Completed:
+
+- Phase 0: Project initialization
+- Phase 1: Database design
+- Phase 2: Authentication
+- Phase 3: App shell
+- Phase 4: Task management
+- Phase 5: Habit tracker
+- Phase 6: Goal tracking
+- Phase 7: Dashboard
+- Phase 8: Analytics
+- Phase 9: Polishing
+
+Remaining:
+
+- Phase 10: Deployment

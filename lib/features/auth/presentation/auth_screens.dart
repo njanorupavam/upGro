@@ -14,6 +14,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _hidePassword = true;
 
   @override
   void dispose() {
@@ -49,8 +50,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               decoration: const InputDecoration(
                 labelText: 'Password',
                 prefixIcon: Icon(Icons.lock_outline),
+              ).copyWith(
+                suffixIcon: IconButton(
+                  tooltip: _hidePassword ? 'Show password' : 'Hide password',
+                  onPressed: () {
+                    setState(() => _hidePassword = !_hidePassword);
+                  },
+                  icon: Icon(
+                    _hidePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                ),
               ),
-              obscureText: true,
+              obscureText: _hidePassword,
               validator: _requiredPassword,
             ),
             if (auth.errorMessage != null) ...[
@@ -107,6 +120,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _hidePassword = true;
 
   @override
   void dispose() {
@@ -152,8 +166,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               decoration: const InputDecoration(
                 labelText: 'Password',
                 prefixIcon: Icon(Icons.lock_outline),
+              ).copyWith(
+                suffixIcon: IconButton(
+                  tooltip: _hidePassword ? 'Show password' : 'Hide password',
+                  onPressed: () {
+                    setState(() => _hidePassword = !_hidePassword);
+                  },
+                  icon: Icon(
+                    _hidePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                ),
               ),
-              obscureText: true,
+              obscureText: _hidePassword,
               validator: _requiredPassword,
             ),
             if (auth.errorMessage != null) ...[
@@ -214,38 +240,115 @@ class AuthScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Icon(
-                  Icons.auto_awesome,
-                  size: 40,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 28),
-                child,
-              ],
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 960),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 760;
+                  final content = AuthPanel(
+                    title: title,
+                    subtitle: subtitle,
+                    child: child,
+                  );
+
+                  if (!wide) {
+                    return content;
+                  }
+
+                  return Row(
+                    children: [
+                      const Expanded(child: BrandPanel()),
+                      const SizedBox(width: 28),
+                      SizedBox(width: 430, child: content),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class AuthPanel extends StatelessWidget {
+  const AuthPanel({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    super.key,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(
+              Icons.auto_awesome,
+              size: 40,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 18),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 28),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BrandPanel extends StatelessWidget {
+  const BrandPanel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.auto_awesome,
+          size: 54,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'DayForge',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Plan the day, build the habit, finish the goal.',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ],
     );
   }
 }
