@@ -2,46 +2,60 @@ import 'package:dayforge/features/analytics/data/analytics_models.dart';
 import 'package:dayforge/features/analytics/data/analytics_repository.dart';
 import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final analyticsControllerProvider =
-    ChangeNotifierProvider<AnalyticsController>((ref) {
-  final auth = ref.watch(authControllerProvider);
-  final controller = AnalyticsController(
-    const AnalyticsRepository(),
-    auth.token,
-  );
-  controller.loadAnalytics();
-  return controller;
-});
+class AnalyticsState {
+  final DashboardAnalytics? analytics;
+  final String? errorMessage;
+  final bool isLoading;
 
-class AnalyticsController extends ChangeNotifier {
-  AnalyticsController(this._repository, this._token);
+  AnalyticsState({
+    this.analytics,
+    this.errorMessage,
+    this.isLoading = false,
+  });
 
-  final AnalyticsRepository _repository;
-  final String? _token;
+  AnalyticsState copyWith({
+    DashboardAnalytics? Function()? analytics,
+    String? Function()? errorMessage,
+    bool? isLoading,
+  }) {
+    return AnalyticsState(
+      analytics: analytics != null ? analytics() : this.analytics,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
 
-  DashboardAnalytics? analytics;
-  String? errorMessage;
-  bool isLoading = false;
+class AnalyticsNotifier extends Notifier<AnalyticsState> {
+  late final AnalyticsRepository _repository;
+  String? _token;
+
+  @override
+  AnalyticsState build() {
+    _repository = ref.watch(analyticsRepositoryProvider);
+    _token = ref.watch(authControllerProvider.select((auth) => auth.token));
+    if (_token != null) {
+      Future.microtask(() => loadAnalytics());
+    }
+    return AnalyticsState();
+  }
 
   Future<void> loadAnalytics() async {
     if (_token == null) {
       return;
     }
 
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
-      analytics = await _repository.dashboard(_token);
+      final analytics = await _repository.dashboard(_token!);
+      state = state.copyWith(analytics: () => analytics);
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
     } finally {
-      isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -56,3 +70,6 @@ class AnalyticsController extends ChangeNotifier {
     return 'Analytics failed to load.';
   }
 }
+
+final analyticsControllerProvider =
+    NotifierProvider<AnalyticsNotifier, AnalyticsState>(AnalyticsNotifier.new);

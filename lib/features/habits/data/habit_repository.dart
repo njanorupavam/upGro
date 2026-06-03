@@ -1,16 +1,23 @@
 import 'package:dayforge/core/network/api_client.dart';
 import 'package:dayforge/features/habits/data/habit_models.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final habitRepositoryProvider = Provider<HabitRepository>((ref) {
+  return HabitRepository(ref.watch(dioProvider));
+});
 
 class HabitRepository {
-  const HabitRepository();
+  const HabitRepository(this._dio);
+
+  final Dio _dio;
 
   Options _options(String token) {
     return Options(headers: {'Authorization': 'Bearer $token'});
   }
 
   Future<List<HabitItem>> listHabits(String token) async {
-    final response = await dio.get<Map<String, dynamic>>(
+    final response = await _dio.get<Map<String, dynamic>>(
       '/habits',
       options: _options(token),
     );
@@ -25,7 +32,7 @@ class HabitRepository {
     required String token,
     required HabitDraft draft,
   }) async {
-    final response = await dio.post<Map<String, dynamic>>(
+    final response = await _dio.post<Map<String, dynamic>>(
       '/habits',
       data: draft.toJson(),
       options: _options(token),
@@ -39,7 +46,7 @@ class HabitRepository {
     required String id,
     required HabitDraft draft,
   }) async {
-    final response = await dio.put<Map<String, dynamic>>(
+    final response = await _dio.put<Map<String, dynamic>>(
       '/habits/$id',
       data: draft.toJson(),
       options: _options(token),
@@ -52,7 +59,7 @@ class HabitRepository {
     required String token,
     required String id,
   }) async {
-    await dio.delete<void>(
+    await _dio.delete<void>(
       '/habits/$id',
       options: _options(token),
     );
@@ -62,7 +69,7 @@ class HabitRepository {
     required String token,
     required String id,
   }) async {
-    final response = await dio.post<Map<String, dynamic>>(
+    final response = await _dio.post<Map<String, dynamic>>(
       '/habits/$id/checkin',
       options: _options(token),
     );

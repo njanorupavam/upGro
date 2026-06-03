@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#737686",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-surface-variant": "#434655",
+                    "primary-container": "#2563eb",
+                    "inverse-primary": "#b4c5ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-container-low": "#eff4ff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "secondary-fixed-dim": "#4edea3",
+                    "primary-fixed": "#dbe1ff",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-container-high": "#dce9ff",
+                    "surface": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "secondary": "#006c49",
+                    "inverse-surface": "#213145",
+                    "on-surface": "#0b1c30",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#002113",
+                    "surface-container": "#e5eeff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#eeefff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "tertiary": "#784b00",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#0053db",
+                    "secondary-container": "#6cf8bb",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed": "#00174b",
+                    "tertiary-fixed": "#ffddb8",
+                    "on-secondary-container": "#00714d",
+                    "outline-variant": "#c3c6d7",
+                    "on-background": "#0b1c30",
+                    "primary": "#004ac6",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-container": "#ffeedd",
+                    "surface-dim": "#cbdbf5",
+                    "tertiary-container": "#996100",
+                    "inverse-on-surface": "#eaf1ff",
+                    "background": "#f8f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "base": "8px",
+                    "lg": "40px",
+                    "gutter": "16px",
+                    "container-margin": "20px",
+                    "xs": "4px",
+                    "sm": "12px",
+                    "md": "24px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Geist"],
+                    "label-md": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "headline-lg-mobile": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "display": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "body-md": ["Geist"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .glossy-accent {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 100%);
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .floating-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        .nav-glow {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+        }
+        .light-leak {
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 40%);
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+      background-image: radial-gradient(at 0% 0%, hsla(221,100%,92%,1) 0, transparent 50%), 
+                        radial-gradient(at 100% 0%, hsla(162,100%,92%,1) 0, transparent 50%);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-surface/60 backdrop-blur-md shadow-sm w-full sticky top-0 z-50 border-b border-surface-container">
+<div class="flex justify-between items-center px-container-margin py-sm w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white/50 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a young woman with a focused and serene expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVdfH6Rc5o6IKo1oHXmrfDIWdXeWjqIvcYFqfsGgzt04312YQArF619maDTwjcsgHgZvf65XDqJmrLH7lzvi5MypM8Ain59b8OJXscr8OKvvYo5hw3odTpAHTTzbHHAWfqyRqgedbxECBTUJswhW7zWWtwllEb4WwjDmPPf4bWpIpv1Zwx0vv_cw_SeivSNMcOyhDbx6McG6ikrjBgpkOcfObWAn0XvO1B1fxfr--SoaWzQnclV8tUCQrpwSF368OqkibKmgdnk1N-"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">FocusFlow</h1>
+</div>
+<button class="material-symbols-outlined text-primary hover:bg-white/40 transition-colors p-2 rounded-full active:scale-90 duration-200">
+                settings
+            </button>
+</div>
+</header>
+<main class="px-container-margin py-md max-w-2xl mx-auto space-y-md">
+<!-- Hero Section: Bento Style -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Progress Ring Card -->
+<div class="glass-card p-md rounded-2xl relative overflow-hidden flex flex-col items-center justify-center">
+<div class="light-leak"></div>
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full">
+<circle class="text-surface-container/50" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary progress-ring-circle" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="364.4" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display text-display text-primary drop-shadow-sm">75%</span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Done</span>
+</div>
+</div>
+<p class="mt-sm font-body-md text-body-md text-on-surface-variant text-center font-medium">Daily Goal Progress</p>
+</div>
+<!-- Streak Card -->
+<div class="bg-gradient-to-br from-primary-container to-primary p-md rounded-2xl shadow-xl flex flex-col justify-between text-on-primary-container overflow-hidden relative group">
+<div class="absolute -right-4 -top-4 opacity-15 transition-transform group-hover:scale-110 duration-500">
+<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="glossy-accent absolute inset-0 rounded-2xl"></div>
+<div class="relative z-10">
+<span class="font-label-sm text-label-sm uppercase opacity-90 tracking-widest font-semibold">Active Streak</span>
+<h2 class="font-display text-display flex items-center gap-xs text-white">
+                        14 <span class="font-headline-md text-headline-md opacity-80">Days</span>
+</h2>
+</div>
+<div class="relative z-10 flex items-center gap-xs mt-md bg-white/20 backdrop-blur-sm self-start px-3 py-1 rounded-full border border-white/20">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+<p class="font-label-md text-label-md font-medium text-white">Personal record: 21 days</p>
+</div>
+</div>
+</div>
+<!-- Daily Focus Card -->
+<div class="glass-card p-md rounded-2xl relative overflow-hidden border border-white/60">
+<div class="light-leak"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="bg-secondary text-white px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span class="font-label-sm text-label-sm uppercase font-bold">Current Focus</span>
+</div>
+<span class="text-on-surface-variant font-label-md text-label-md font-medium bg-white/40 px-2 py-1 rounded-lg">2h remaining</span>
+</div>
+<div class="relative z-10">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-xs">Architectural Redesign Phase 2</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md leading-relaxed">Reviewing spatial layouts and core structural dependencies for the main module.</p>
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-4 rounded-xl flex items-center justify-center gap-2 shadow-[0_10px_20px_-5px_rgba(0,74,198,0.4)] active:scale-[0.97] transition-all hover:brightness-110">
+<span class="material-symbols-outlined fill-[1]">play_arrow</span>
+                Resume Focus Session
+            </button>
+</div>
+</div>
+<!-- Habit List -->
+<div class="space-y-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm px-1">
+                Habits
+                <span class="font-label-md text-label-md bg-white/60 backdrop-blur-sm border border-white/50 px-2.5 py-0.5 rounded-lg text-primary font-bold">3 Today</span>
+</h4>
+<!-- Habit Card 1 (Completed) -->
+<div class="flex items-center justify-between p-md glass-card rounded-2xl border-l-4 border-l-secondary group cursor-pointer transition-all hover:translate-x-1">
+<div class="flex items-center gap-md">
+<div class="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-on-secondary shadow-md">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div>
+<h5 class="font-label-md text-label-md text-on-surface line-through opacity-60">Deep Work Session</h5>
+<p class="font-label-sm text-label-sm text-secondary font-medium">Completed at 9:00 AM</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary font-bold">verified</span>
+</div>
+<!-- Habit Card 2 (Pending) -->
+<div class="flex items-center justify-between p-md glass-card rounded-2xl group cursor-pointer hover:shadow-lg transition-all active:scale-[0.99]">
+<div class="flex items-center gap-md">
+<div class="w-11 h-11 rounded-full border-2 border-primary/20 bg-white/30 group-hover:border-primary transition-colors flex items-center justify-center">
+<div class="w-6 h-6 rounded-full group-active:bg-primary/20 transition-all"></div>
+</div>
+<div>
+<h5 class="font-label-md text-label-md text-on-surface font-semibold">Morning Hydration</h5>
+<p class="font-label-sm text-label-sm text-outline">Target: 500ml</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white/40 px-2 py-1 rounded-lg">
+<span class="font-label-sm text-label-sm text-outline font-bold">Health</span>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(120,75,0,0.5)]"></div>
+</div>
+</div>
+<!-- Habit Card 3 (Pending) -->
+<div class="flex items-center justify-between p-md glass-card rounded-2xl group cursor-pointer hover:shadow-lg transition-all active:scale-[0.99]">
+<div class="flex items-center gap-md">
+<div class="w-11 h-11 rounded-full border-2 border-primary/20 bg-white/30 group-hover:border-primary transition-colors flex items-center justify-center">
+<div class="w-6 h-6 rounded-full group-active:bg-primary/20 transition-all"></div>
+</div>
+<div>
+<h5 class="font-label-md text-label-md text-on-surface font-semibold">Digital Declutter</h5>
+<p class="font-label-sm text-label-sm text-outline">Evening review</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-white/40 px-2 py-1 rounded-lg">
+<span class="font-label-sm text-label-sm text-outline font-bold">Work</span>
+<div class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(0,74,198,0.5)]"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating BottomNavBar -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50">
+<nav class="floating-nav rounded-2xl px-2 py-2 flex justify-around items-center">
+<div class="flex flex-col items-center justify-center bg-primary text-white rounded-xl px-6 py-2.5 shadow-lg nav-glow transition-all duration-300 cursor-pointer group">
+<span class="material-symbols-outlined scale-110" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-label-sm text-label-sm font-bold mt-0.5">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200 cursor-pointer p-2 rounded-xl hover:bg-white/40">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-label-sm text-label-sm mt-0.5">Habits</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200 cursor-pointer p-2 rounded-xl hover:bg-white/40">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm mt-0.5">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200 cursor-pointer p-2 rounded-xl hover:bg-white/40">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-sm text-label-sm mt-0.5">Setup</span>
+</div>
+</nav>
+</div>
+<script>
+        // Micro-interactions for habit cards with glossy feedback
+        document.querySelectorAll('.cursor-pointer').forEach(card => {
+            card.addEventListener('click', function() {
+                const checkCircle = this.querySelector('.border-2');
+                if (checkCircle) {
+                    const isChecked = checkCircle.classList.contains('bg-primary');
+                    if (!isChecked) {
+                        checkCircle.classList.remove('border-primary/20', 'bg-white/30');
+                        checkCircle.classList.add('border-primary', 'bg-primary', 'shadow-md');
+                        checkCircle.innerHTML = '<span class="material-symbols-outlined text-white text-[20px] font-bold">check</span>';
+                        // Add success animation
+                        checkCircle.animate([
+                            { transform: 'scale(1)' },
+                            { transform: 'scale(1.2)' },
+                            { transform: 'scale(1)' }
+                        ], { duration: 300, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+                    } else {
+                        checkCircle.classList.add('border-primary/20', 'bg-white/30');
+                        checkCircle.classList.remove('border-primary', 'bg-primary', 'shadow-md');
+                        checkCircle.innerHTML = '';
+                    }
+                }
+            });
+        });
+
+        // Glossy animation for progress ring on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const circle = document.querySelector('.progress-ring-circle');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            
+            circle.style.strokeDasharray = circumference;
+            circle.style.strokeDashoffset = circumference;
+            
+            // Trigger animation
+            setTimeout(() => {
+                const targetPercent = 75;
+                const offset = circumference - (targetPercent / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+            }, 500);
+        });
+
+        // Hover effect for nav items
+        document.querySelectorAll('.floating-nav > div').forEach(navItem => {
+            if(!navItem.classList.contains('bg-primary')) {
+                navItem.addEventListener('mouseenter', () => {
+                    navItem.style.transform = 'translateY(-2px)';
+                });
+                navItem.addEventListener('mouseleave', () => {
+                    navItem.style.transform = 'translateY(0)';
+                });
+            }
+        });
+    </script>
+</body></html>

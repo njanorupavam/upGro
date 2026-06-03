@@ -2,43 +2,64 @@ import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dayforge/features/goals/data/goal_models.dart';
 import 'package:dayforge/features/goals/data/goal_repository.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final goalsControllerProvider = ChangeNotifierProvider<GoalsController>((ref) {
-  final auth = ref.watch(authControllerProvider);
-  final controller = GoalsController(const GoalRepository(), auth.token);
-  controller.loadGoals();
-  return controller;
-});
+class GoalsState {
+  final List<GoalItem> goals;
+  final String? errorMessage;
+  final bool isLoading;
+  final bool isSaving;
 
-class GoalsController extends ChangeNotifier {
-  GoalsController(this._repository, this._token);
+  GoalsState({
+    this.goals = const [],
+    this.errorMessage,
+    this.isLoading = false,
+    this.isSaving = false,
+  });
 
-  final GoalRepository _repository;
-  final String? _token;
+  GoalsState copyWith({
+    List<GoalItem>? goals,
+    String? Function()? errorMessage,
+    bool? isLoading,
+    bool? isSaving,
+  }) {
+    return GoalsState(
+      goals: goals ?? this.goals,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
+      isLoading: isLoading ?? this.isLoading,
+      isSaving: isSaving ?? this.isSaving,
+    );
+  }
+}
 
-  List<GoalItem> goals = [];
-  String? errorMessage;
-  bool isLoading = false;
-  bool isSaving = false;
+class GoalsNotifier extends Notifier<GoalsState> {
+  late final GoalRepository _repository;
+  String? _token;
+
+  @override
+  GoalsState build() {
+    _repository = ref.watch(goalRepositoryProvider);
+    _token = ref.watch(authControllerProvider.select((auth) => auth.token));
+    if (_token != null) {
+      Future.microtask(() => loadGoals());
+    }
+    return GoalsState();
+  }
 
   Future<void> loadGoals() async {
     if (_token == null) {
       return;
     }
 
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
-      goals = await _repository.listGoals(_token);
+      final goals = await _repository.listGoals(_token!);
+      state = state.copyWith(goals: goals);
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
     } finally {
-      isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -55,20 +76,17 @@ class GoalsController extends ChangeNotifier {
       return false;
     }
 
-    isSaving = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSaving: true, errorMessage: () => null);
 
     try {
-      await _repository.deleteGoal(token: _token, id: id);
+      await _repository.deleteGoal(token: _token!, id: id);
       await loadGoals();
       return true;
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
       return false;
     } finally {
-      isSaving = false;
-      notifyListeners();
+      state = state.copyWith(isSaving: false);
     }
   }
 
@@ -77,20 +95,17 @@ class GoalsController extends ChangeNotifier {
       return false;
     }
 
-    isSaving = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSaving: true, errorMessage: () => null);
 
     try {
       await action();
       await loadGoals();
       return true;
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
       return false;
     } finally {
-      isSaving = false;
-      notifyListeners();
+      state = state.copyWith(isSaving: false);
     }
   }
 
@@ -105,3 +120,5 @@ class GoalsController extends ChangeNotifier {
     return 'Goal action failed. Please try again.';
   }
 }
+
+final goalsControllerProvider = NotifierProvider<GoalsNotifier, GoalsState>(GoalsNotifier.new);

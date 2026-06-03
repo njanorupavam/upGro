@@ -2,43 +2,64 @@ import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dayforge/features/habits/data/habit_models.dart';
 import 'package:dayforge/features/habits/data/habit_repository.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final habitsControllerProvider = ChangeNotifierProvider<HabitsController>((ref) {
-  final auth = ref.watch(authControllerProvider);
-  final controller = HabitsController(const HabitRepository(), auth.token);
-  controller.loadHabits();
-  return controller;
-});
+class HabitsState {
+  final List<HabitItem> habits;
+  final String? errorMessage;
+  final bool isLoading;
+  final bool isSaving;
 
-class HabitsController extends ChangeNotifier {
-  HabitsController(this._repository, this._token);
+  HabitsState({
+    this.habits = const [],
+    this.errorMessage,
+    this.isLoading = false,
+    this.isSaving = false,
+  });
 
-  final HabitRepository _repository;
-  final String? _token;
+  HabitsState copyWith({
+    List<HabitItem>? habits,
+    String? Function()? errorMessage,
+    bool? isLoading,
+    bool? isSaving,
+  }) {
+    return HabitsState(
+      habits: habits ?? this.habits,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
+      isLoading: isLoading ?? this.isLoading,
+      isSaving: isSaving ?? this.isSaving,
+    );
+  }
+}
 
-  List<HabitItem> habits = [];
-  String? errorMessage;
-  bool isLoading = false;
-  bool isSaving = false;
+class HabitsNotifier extends Notifier<HabitsState> {
+  late final HabitRepository _repository;
+  String? _token;
+
+  @override
+  HabitsState build() {
+    _repository = ref.watch(habitRepositoryProvider);
+    _token = ref.watch(authControllerProvider.select((auth) => auth.token));
+    if (_token != null) {
+      Future.microtask(() => loadHabits());
+    }
+    return HabitsState();
+  }
 
   Future<void> loadHabits() async {
     if (_token == null) {
       return;
     }
 
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
-      habits = await _repository.listHabits(_token);
+      final habits = await _repository.listHabits(_token!);
+      state = state.copyWith(habits: habits);
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
     } finally {
-      isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -59,20 +80,17 @@ class HabitsController extends ChangeNotifier {
       return false;
     }
 
-    isSaving = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSaving: true, errorMessage: () => null);
 
     try {
-      await _repository.deleteHabit(token: _token, id: id);
+      await _repository.deleteHabit(token: _token!, id: id);
       await loadHabits();
       return true;
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
       return false;
     } finally {
-      isSaving = false;
-      notifyListeners();
+      state = state.copyWith(isSaving: false);
     }
   }
 
@@ -81,20 +99,17 @@ class HabitsController extends ChangeNotifier {
       return false;
     }
 
-    isSaving = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSaving: true, errorMessage: () => null);
 
     try {
       await action();
       await loadHabits();
       return true;
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
       return false;
     } finally {
-      isSaving = false;
-      notifyListeners();
+      state = state.copyWith(isSaving: false);
     }
   }
 
@@ -109,3 +124,5 @@ class HabitsController extends ChangeNotifier {
     return 'Habit action failed. Please try again.';
   }
 }
+
+final habitsControllerProvider = NotifierProvider<HabitsNotifier, HabitsState>(HabitsNotifier.new);

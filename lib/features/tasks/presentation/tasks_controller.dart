@@ -2,62 +2,86 @@ import 'package:dayforge/features/auth/presentation/auth_controller.dart';
 import 'package:dayforge/features/tasks/data/task_models.dart';
 import 'package:dayforge/features/tasks/data/task_repository.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final tasksControllerProvider = ChangeNotifierProvider<TasksController>((ref) {
-  final auth = ref.watch(authControllerProvider);
-  final controller = TasksController(
-    const TaskRepository(),
-    auth.token,
-  );
-  controller.loadTasks();
-  return controller;
-});
+class TasksState {
+  final List<TaskItem> tasks;
+  final TaskStatus? statusFilter;
+  final TaskPriority? priorityFilter;
+  final String? errorMessage;
+  final bool isLoading;
+  final bool isSaving;
 
-class TasksController extends ChangeNotifier {
-  TasksController(this._repository, this._token);
+  TasksState({
+    this.tasks = const [],
+    this.statusFilter,
+    this.priorityFilter,
+    this.errorMessage,
+    this.isLoading = false,
+    this.isSaving = false,
+  });
 
-  final TaskRepository _repository;
-  final String? _token;
+  TasksState copyWith({
+    List<TaskItem>? tasks,
+    TaskStatus? Function()? statusFilter,
+    TaskPriority? Function()? priorityFilter,
+    String? Function()? errorMessage,
+    bool? isLoading,
+    bool? isSaving,
+  }) {
+    return TasksState(
+      tasks: tasks ?? this.tasks,
+      statusFilter: statusFilter != null ? statusFilter() : this.statusFilter,
+      priorityFilter: priorityFilter != null ? priorityFilter() : this.priorityFilter,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
+      isLoading: isLoading ?? this.isLoading,
+      isSaving: isSaving ?? this.isSaving,
+    );
+  }
+}
 
-  List<TaskItem> tasks = [];
-  TaskStatus? statusFilter;
-  TaskPriority? priorityFilter;
-  String? errorMessage;
-  bool isLoading = false;
-  bool isSaving = false;
+class TasksNotifier extends Notifier<TasksState> {
+  late final TaskRepository _repository;
+  String? _token;
+
+  @override
+  TasksState build() {
+    _repository = ref.watch(taskRepositoryProvider);
+    _token = ref.watch(authControllerProvider.select((auth) => auth.token));
+    if (_token != null) {
+      Future.microtask(() => loadTasks());
+    }
+    return TasksState();
+  }
 
   Future<void> loadTasks() async {
     if (_token == null) {
       return;
     }
 
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
-      tasks = await _repository.listTasks(
-        token: _token,
-        status: statusFilter,
-        priority: priorityFilter,
+      final tasks = await _repository.listTasks(
+        token: _token!,
+        status: state.statusFilter,
+        priority: state.priorityFilter,
       );
+      state = state.copyWith(tasks: tasks);
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
     } finally {
-      isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
     }
   }
 
   Future<void> setStatusFilter(TaskStatus? status) async {
-    statusFilter = status;
+    state = state.copyWith(statusFilter: () => status);
     await loadTasks();
   }
 
   Future<void> setPriorityFilter(TaskPriority? priority) async {
-    priorityFilter = priority;
+    state = state.copyWith(priorityFilter: () => priority);
     await loadTasks();
   }
 
@@ -91,20 +115,17 @@ class TasksController extends ChangeNotifier {
       return false;
     }
 
-    isSaving = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSaving: true, errorMessage: () => null);
 
     try {
-      await _repository.deleteTask(token: _token, id: id);
+      await _repository.deleteTask(token: _token!, id: id);
       await loadTasks();
       return true;
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
       return false;
     } finally {
-      isSaving = false;
-      notifyListeners();
+      state = state.copyWith(isSaving: false);
     }
   }
 
@@ -113,20 +134,17 @@ class TasksController extends ChangeNotifier {
       return false;
     }
 
-    isSaving = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSaving: true, errorMessage: () => null);
 
     try {
       await action();
       await loadTasks();
       return true;
     } catch (error) {
-      errorMessage = _readError(error);
+      state = state.copyWith(errorMessage: () => _readError(error));
       return false;
     } finally {
-      isSaving = false;
-      notifyListeners();
+      state = state.copyWith(isSaving: false);
     }
   }
 
@@ -141,3 +159,5 @@ class TasksController extends ChangeNotifier {
     return 'Task action failed. Please try again.';
   }
 }
+
+final tasksControllerProvider = NotifierProvider<TasksNotifier, TasksState>(TasksNotifier.new);

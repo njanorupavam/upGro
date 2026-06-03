@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "outline": "#737686",
+                  "on-error-container": "#93000a",
+                  "secondary-fixed": "#6ffbbe",
+                  "on-surface-variant": "#434655",
+                  "primary-container": "#2563eb",
+                  "inverse-primary": "#b4c5ff",
+                  "surface-container-highest": "#d3e4fe",
+                  "surface-container-low": "#eff4ff",
+                  "tertiary-fixed-dim": "#ffb95f",
+                  "secondary-fixed-dim": "#4edea3",
+                  "primary-fixed": "#dbe1ff",
+                  "on-tertiary-fixed": "#2a1700",
+                  "surface-container-high": "#dce9ff",
+                  "surface": "#f8f9ff",
+                  "surface-container-lowest": "#ffffff",
+                  "surface-variant": "#d3e4fe",
+                  "secondary": "#006c49",
+                  "inverse-surface": "#213145",
+                  "on-surface": "#0b1c30",
+                  "surface-bright": "#f8f9ff",
+                  "on-primary": "#ffffff",
+                  "error-container": "#ffdad6",
+                  "on-secondary-fixed": "#002113",
+                  "surface-container": "#e5eeff",
+                  "on-secondary": "#ffffff",
+                  "on-primary-container": "#eeefff",
+                  "on-secondary-fixed-variant": "#005236",
+                  "tertiary": "#784b00",
+                  "error": "#ba1a1a",
+                  "surface-tint": "#0053db",
+                  "secondary-container": "#6cf8bb",
+                  "on-primary-fixed-variant": "#003ea8",
+                  "on-tertiary": "#ffffff",
+                  "on-primary-fixed": "#00174b",
+                  "tertiary-fixed": "#ffddb8",
+                  "on-secondary-container": "#00714d",
+                  "outline-variant": "#c3c6d7",
+                  "on-background": "#0b1c30",
+                  "primary": "#004ac6",
+                  "on-error": "#ffffff",
+                  "on-tertiary-fixed-variant": "#653e00",
+                  "primary-fixed-dim": "#b4c5ff",
+                  "on-tertiary-container": "#ffeedd",
+                  "surface-dim": "#cbdbf5",
+                  "tertiary-container": "#996100",
+                  "inverse-on-surface": "#eaf1ff",
+                  "background": "#f8f9ff"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "xl": "64px",
+                  "base": "8px",
+                  "lg": "40px",
+                  "gutter": "16px",
+                  "container-margin": "20px",
+                  "xs": "4px",
+                  "sm": "12px",
+                  "md": "24px"
+          },
+          "fontFamily": {
+                  "body-lg": ["Geist"],
+                  "label-md": ["Geist"],
+                  "headline-md": ["Geist"],
+                  "headline-lg-mobile": ["Geist"],
+                  "headline-lg": ["Geist"],
+                  "display": ["Geist"],
+                  "label-sm": ["Geist"],
+                  "body-md": ["Geist"]
+          },
+          "fontSize": {
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "display": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Geist', sans-serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+    .glass-dock {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    }
+    .heatmap-cell {
+      aspect-ratio: 1 / 1;
+      border-radius: 6px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .heatmap-cell:hover {
+      transform: scale(1.25) translateY(-2px);
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .glossy-gradient-primary {
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .glossy-gradient-primary::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+    }
+    .glossy-gradient-secondary {
+      background: linear-gradient(135deg, #006c49 0%, #10b981 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .glossy-gradient-secondary::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 100%);
+    }
+    .refractive-border {
+      position: relative;
+    }
+    .refractive-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.1) 60%, rgba(255,255,255,0.6) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+      background-image: radial-gradient(at 0% 0%, hsla(220,100%,95%,1) 0, transparent 50%), 
+                        radial-gradient(at 100% 100%, hsla(160,100%,95%,1) 0, transparent 50%);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 bg-surface/80 backdrop-blur-md shadow-sm z-50 border-b border-white/20">
+<div class="flex justify-between items-center px-container-margin py-sm w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container border border-white shadow-inner">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9l_QLjJb90X57jWk-8ZARajZuBjfHWWHBxSh4Mrc13p_84117pjqLGwz5ZM6tjWAxsVC3VRtGBJ_1muf7wZ65hT65i7i7SKWGyNG4nXH7zCyX2ngRiMMOO5-pUo-EmtmRnlcHuY6F0gv13omUwJX-0RYKFuEuo9f-A8QFO3TS-o_q4QK97Gkjs7POm1BcmRVhf2SbT18B56OfN6zRiPX72cF8rFHOLvpvE9Uyf9ESrrXX48yoEMdcTOQrkstlZv7NRKPhiFGuo2oe"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary tracking-tight">FocusFlow</h1>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-white/50 transition-colors active:scale-95 duration-200">
+        settings
+      </button>
+</div>
+</header>
+<main class="px-container-margin py-md max-w-7xl mx-auto space-y-md">
+<!-- Hero Header -->
+<section class="space-y-xs">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Your Insights</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Momentum is building. You're in the flow.</p>
+</section>
+<!-- Stats Bento Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-sm">
+<!-- Current Streak -->
+<div class="glass-card refractive-border p-md rounded-xl space-y-xs overflow-hidden">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Current Streak</span>
+<div class="flex items-end gap-xs">
+<span class="font-display text-display text-primary leading-none drop-shadow-sm">12</span>
+<span class="font-label-md text-label-md text-primary pb-1">days</span>
+</div>
+<div class="h-1.5 w-full bg-white/40 rounded-full overflow-hidden shadow-inner">
+<div class="h-full glossy-gradient-primary w-3/4 rounded-full"></div>
+</div>
+</div>
+<!-- Completion % -->
+<div class="glass-card refractive-border p-md rounded-xl space-y-xs overflow-hidden">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Completion %</span>
+<div class="flex items-end gap-xs">
+<span class="font-display text-display text-secondary leading-none drop-shadow-sm">88</span>
+<span class="font-label-md text-label-md text-secondary pb-1">%</span>
+</div>
+<div class="h-1.5 w-full bg-white/40 rounded-full overflow-hidden shadow-inner">
+<div class="h-full glossy-gradient-secondary w-[88%] rounded-full"></div>
+</div>
+</div>
+<!-- Total Habits -->
+<div class="glass-card refractive-border p-md rounded-xl space-y-xs overflow-hidden">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total Habits</span>
+<div class="flex items-end gap-xs">
+<span class="font-display text-display text-on-surface leading-none">6</span>
+<span class="font-label-md text-label-md text-on-surface-variant pb-1">active</span>
+</div>
+<div class="h-1.5 w-full bg-white/40 rounded-full overflow-hidden shadow-inner">
+<div class="h-full bg-outline/20 w-full rounded-full"></div>
+</div>
+</div>
+<!-- Best Month -->
+<div class="glass-card refractive-border p-md rounded-xl space-y-xs overflow-hidden">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Best Month</span>
+<div class="flex items-end gap-xs">
+<span class="font-headline-md text-headline-md text-tertiary uppercase tracking-wider leading-none">MARCH</span>
+</div>
+<div class="flex items-center gap-xs text-tertiary">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="font-label-sm text-label-sm">New Record</span>
+</div>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Weekly Flow Bar Chart -->
+<div class="md:col-span-2 glass-card refractive-border p-md rounded-xl overflow-hidden">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Weekly Flow</h3>
+<div class="flex gap-xs">
+<span class="w-3 h-3 rounded-full glossy-gradient-primary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Focus Hours</span>
+</div>
+</div>
+<div class="flex items-end justify-between h-48 px-sm">
+<!-- Bars with Glossy Effect -->
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] bg-white/30 rounded-t-lg relative group transition-all" style="height: 60%;">
+<div class="absolute inset-0 glossy-gradient-primary opacity-20 group-hover:opacity-40 transition-opacity rounded-t-lg"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">4.2h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] glossy-gradient-primary rounded-t-lg relative group transition-all shadow-lg" style="height: 85%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">6.5h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] bg-white/30 rounded-t-lg relative group transition-all" style="height: 45%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">3.1h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] glossy-gradient-primary rounded-t-lg relative group transition-all shadow-lg" style="height: 95%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">7.2h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] bg-white/30 rounded-t-lg relative group transition-all" style="height: 70%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">5.0h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] bg-primary-container/40 rounded-t-lg relative group transition-all" style="height: 30%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">2.2h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sat</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full max-w-[36px] bg-white/30 rounded-t-lg relative group transition-all" style="height: 55%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">3.9h</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sun</span>
+</div>
+</div>
+</div>
+<!-- Category Breakdown -->
+<div class="glass-card refractive-border p-md rounded-xl flex flex-col justify-center items-center text-center">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-sm w-full text-left">Balance</h3>
+<div class="relative w-32 h-32 mb-md drop-shadow-xl">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-white/30" cx="64" cy="64" fill="transparent" r="54" stroke="currentColor" stroke-width="10"></circle>
+<defs>
+<lineargradient id="gloss-grad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#2563eb"></stop>
+<stop offset="100%" stop-color="#3b82f6"></stop>
+</lineargradient>
+</defs>
+<circle cx="64" cy="64" fill="transparent" r="54" stroke="url(#gloss-grad)" stroke-dasharray="339.3" stroke-dashoffset="84.8" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-md text-headline-md text-on-surface">75%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Work</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-sm w-full">
+<div class="flex items-center gap-xs">
+<span class="w-2.5 h-2.5 rounded-full glossy-gradient-primary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Deep Work</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="w-2.5 h-2.5 rounded-full glossy-gradient-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Health</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Monthly Rituals Heatmap Grid -->
+<section class="glass-card refractive-border p-md rounded-xl">
+<div class="flex justify-between items-center mb-md">
+<div class="space-y-xs">
+<h3 class="font-headline-md text-headline-md text-on-surface">Monthly Rituals</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Consistency visualization for the last 30 days</p>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Less</span>
+<div class="flex gap-1">
+<div class="w-3.5 h-3.5 bg-white/30 rounded-sm"></div>
+<div class="w-3.5 h-3.5 bg-primary-container/20 rounded-sm"></div>
+<div class="w-3.5 h-3.5 bg-primary-container/50 rounded-sm"></div>
+<div class="w-3.5 h-3.5 bg-primary/80 rounded-sm"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">More</span>
+</div>
+</div>
+<!-- Heatmap Container -->
+<div class="grid grid-cols-7 md:grid-cols-15 gap-2" id="heatmap-grid">
+<!-- JS will populate this for dynamic look -->
+</div>
+</section>
+<!-- Detailed Insights -->
+<section class="space-y-sm">
+<h3 class="font-headline-md text-headline-md text-on-surface">Recent Wins</h3>
+<div class="space-y-sm">
+<div class="flex items-center gap-md p-sm glass-card refractive-border rounded-xl">
+<div class="w-12 h-12 rounded-full glossy-gradient-secondary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Productivity Peak</p>
+<p class="font-label-md text-label-md text-on-surface-variant">You've completed "Deep Work" 5 days in a row.</p>
+</div>
+</div>
+<div class="flex items-center gap-md p-sm glass-card refractive-border rounded-xl">
+<div class="w-12 h-12 rounded-full glossy-gradient-primary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined">nightlight</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Evening Consistency</p>
+<p class="font-label-md text-label-md text-on-surface-variant">"Meditation" habit is becoming a stable ritual.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Glassmorphic Dock Navigation -->
+<div class="fixed bottom-6 left-0 w-full flex justify-center z-50 pointer-events-none">
+<nav class="glass-dock flex justify-around items-center px-6 py-3 w-[90%] max-w-md rounded-2xl pointer-events-auto transition-transform hover:scale-[1.02] duration-500">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all duration-300 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1">calendar_today</span>
+<span class="font-label-sm text-[10px] uppercase tracking-widest font-bold">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all duration-300 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1">check_circle</span>
+<span class="font-label-sm text-[10px] uppercase tracking-widest font-bold">Habits</span>
+</a>
+<a class="flex flex-col items-center justify-center relative px-4" href="#">
+<div class="absolute inset-0 glossy-gradient-primary rounded-xl -z-10 shadow-lg shadow-primary/30"></div>
+<span class="material-symbols-outlined text-white mb-1" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-sm text-[10px] text-white uppercase tracking-widest font-bold">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all duration-300 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1">add_circle</span>
+<span class="font-label-sm text-[10px] uppercase tracking-widest font-bold">Setup</span>
+</a>
+</nav>
+</div>
+<script>
+    // Populate Heatmap with glossy dynamic intensity
+    const heatmapGrid = document.getElementById('heatmap-grid');
+    const bgClasses = [
+      'bg-white/20', 
+      'bg-primary-container/30', 
+      'bg-primary-container/60', 
+      'glossy-gradient-primary'
+    ];
+    
+    for (let i = 0; i < 35; i++) {
+      const cell = document.createElement('div');
+      const intensity = Math.floor(Math.random() * 4);
+      cell.className = `heatmap-cell ${bgClasses[intensity]} cursor-pointer`;
+      
+      // Randomly hide some on mobile to look better
+      if (i > 20) cell.classList.add('hidden', 'md:block');
+      
+      heatmapGrid.appendChild(cell);
+    }
+
+    // Interactive bar chart effect
+    document.querySelectorAll('.group').forEach(bar => {
+      bar.addEventListener('mouseenter', () => {
+        bar.style.transform = 'scaleY(1.05) translateY(-4px)';
+        bar.style.filter = 'brightness(1.1)';
+      });
+      bar.addEventListener('mouseleave', () => {
+        bar.style.transform = 'scaleY(1) translateY(0)';
+        bar.style.filter = 'none';
+      });
+    });
+  </script>
+</body></html>

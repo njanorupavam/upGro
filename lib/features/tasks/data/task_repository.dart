@@ -1,9 +1,16 @@
 import 'package:dayforge/core/network/api_client.dart';
 import 'package:dayforge/features/tasks/data/task_models.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final taskRepositoryProvider = Provider<TaskRepository>((ref) {
+  return TaskRepository(ref.watch(dioProvider));
+});
 
 class TaskRepository {
-  const TaskRepository();
+  const TaskRepository(this._dio);
+
+  final Dio _dio;
 
   Options _options(String token) {
     return Options(headers: {'Authorization': 'Bearer $token'});
@@ -14,7 +21,7 @@ class TaskRepository {
     TaskStatus? status,
     TaskPriority? priority,
   }) async {
-    final response = await dio.get<Map<String, dynamic>>(
+    final response = await _dio.get<Map<String, dynamic>>(
       '/tasks',
       queryParameters: {
         if (status != null) 'status': status.apiValue,
@@ -33,7 +40,7 @@ class TaskRepository {
     required String token,
     required TaskDraft draft,
   }) async {
-    final response = await dio.post<Map<String, dynamic>>(
+    final response = await _dio.post<Map<String, dynamic>>(
       '/tasks',
       data: draft.toJson(),
       options: _options(token),
@@ -47,7 +54,7 @@ class TaskRepository {
     required String id,
     required TaskDraft draft,
   }) async {
-    final response = await dio.put<Map<String, dynamic>>(
+    final response = await _dio.put<Map<String, dynamic>>(
       '/tasks/$id',
       data: draft.toJson(),
       options: _options(token),
@@ -60,7 +67,7 @@ class TaskRepository {
     required String token,
     required String id,
   }) async {
-    await dio.delete<void>(
+    await _dio.delete<void>(
       '/tasks/$id',
       options: _options(token),
     );

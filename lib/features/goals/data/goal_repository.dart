@@ -1,16 +1,23 @@
 import 'package:dayforge/core/network/api_client.dart';
 import 'package:dayforge/features/goals/data/goal_models.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final goalRepositoryProvider = Provider<GoalRepository>((ref) {
+  return GoalRepository(ref.watch(dioProvider));
+});
 
 class GoalRepository {
-  const GoalRepository();
+  const GoalRepository(this._dio);
+
+  final Dio _dio;
 
   Options _options(String token) {
     return Options(headers: {'Authorization': 'Bearer $token'});
   }
 
   Future<List<GoalItem>> listGoals(String token) async {
-    final response = await dio.get<Map<String, dynamic>>(
+    final response = await _dio.get<Map<String, dynamic>>(
       '/goals',
       options: _options(token),
     );
@@ -25,7 +32,7 @@ class GoalRepository {
     required String token,
     required GoalDraft draft,
   }) async {
-    final response = await dio.post<Map<String, dynamic>>(
+    final response = await _dio.post<Map<String, dynamic>>(
       '/goals',
       data: draft.toJson(),
       options: _options(token),
@@ -39,7 +46,7 @@ class GoalRepository {
     required String id,
     required GoalDraft draft,
   }) async {
-    final response = await dio.put<Map<String, dynamic>>(
+    final response = await _dio.put<Map<String, dynamic>>(
       '/goals/$id',
       data: draft.toJson(),
       options: _options(token),
@@ -52,7 +59,7 @@ class GoalRepository {
     required String token,
     required String id,
   }) async {
-    await dio.delete<void>(
+    await _dio.delete<void>(
       '/goals/$id',
       options: _options(token),
     );

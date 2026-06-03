@@ -1,49 +1,74 @@
 import 'package:dayforge/features/auth/data/auth_models.dart';
 import 'package:dayforge/features/auth/data/auth_repository.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _tokenStorageKey = 'dayforge_auth_token';
 
-final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
-  final controller = AuthController(const AuthRepository());
-  controller.restoreSession();
-  return controller;
-});
+class AuthState {
+  final AppUser? user;
+  final String? token;
+  final String? errorMessage;
+  final bool isInitialized;
+  final bool isLoading;
 
-class AuthController extends ChangeNotifier {
-  AuthController(this._repository);
-
-  final AuthRepository _repository;
-
-  AppUser? user;
-  String? token;
-  String? errorMessage;
-  bool isInitialized = false;
-  bool isLoading = false;
+  AuthState({
+    this.user,
+    this.token,
+    this.errorMessage,
+    this.isInitialized = false,
+    this.isLoading = false,
+  });
 
   bool get isAuthenticated => token != null && user != null;
+
+  AuthState copyWith({
+    AppUser? Function()? user,
+    String? Function()? token,
+    String? Function()? errorMessage,
+    bool? isInitialized,
+    bool? isLoading,
+  }) {
+    return AuthState(
+      user: user != null ? user() : this.user,
+      token: token != null ? token() : this.token,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
+      isInitialized: isInitialized ?? this.isInitialized,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
+
+class AuthNotifier extends Notifier<AuthState> {
+  late final AuthRepository _repository;
+
+  @override
+  AuthState build() {
+    _repository = ref.watch(authRepositoryProvider);
+    restoreSession();
+    return AuthState();
+  }
 
   Future<void> restoreSession() async {
     final preferences = await SharedPreferences.getInstance();
     final storedToken = preferences.getString(_tokenStorageKey);
 
     if (storedToken == null) {
-      isInitialized = true;
-      notifyListeners();
+      state = state.copyWith(isInitialized: true);
       return;
     }
 
     try {
-      user = await _repository.profile(storedToken);
-      token = storedToken;
+      final user = await _repository.profile(storedToken);
+      state = state.copyWith(
+        user: () => user,
+        token: () => storedToken,
+        isInitialized: true,
+      );
     } catch (_) {
       await preferences.remove(_tokenStorageKey);
-    } finally {
-      isInitialized = true;
-      notifyListeners();
+      state = state.copyWith(isInitialized: true);
     }
   }
 
@@ -73,33 +98,43 @@ class AuthController extends ChangeNotifier {
     );
   }
 
+  Future<bool> loginWithGoogle({
+    required String email,
+    required String name,
+    required String googleId,
+  }) async {
+    return _authenticate(
+      () => _repository.googleLogin(
+        email: email,
+        name: name,
+        googleId: googleId,
+      ),
+    );
+  }
+
   Future<void> logout() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove(_tokenStorageKey);
-    token = null;
-    user = null;
-    errorMessage = null;
-    notifyListeners();
+    state = AuthState(isInitialized: true);
   }
 
   Future<bool> _authenticate(Future<AuthResult> Function() action) async {
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
       final result = await action();
       final preferences = await SharedPreferences.getInstance();
       await preferences.setString(_tokenStorageKey, result.token);
-      token = result.token;
-      user = result.user;
+      state = state.copyWith(
+        token: () => result.token,
+        user: () => result.user,
+      );
       return true;
     } catch (error) {
-      errorMessage = _readErrorMessage(error);
+      state = state.copyWith(errorMessage: () => _readErrorMessage(error));
       return false;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -114,3 +149,5 @@ class AuthController extends ChangeNotifier {
     return 'Authentication failed. Please try again.';
   }
 }
+
+final authControllerProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);

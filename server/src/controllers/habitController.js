@@ -27,60 +27,24 @@ function weeklyProgress(checkIns) {
   });
 }
 
-async function recalculateStreaks(habitId) {
-  const checkIns = await prisma.habitCheckIn.findMany({
-    where: { habitId },
-    orderBy: { date: 'desc' },
-  });
-
-  const checkedDates = new Set(checkIns.map((checkIn) => dateKey(checkIn.date)));
-  let cursor = startOfUtcDay();
-  let currentStreak = 0;
-
-  while (checkedDates.has(dateKey(cursor))) {
-    currentStreak += 1;
-    cursor = addDays(cursor, -1);
-  }
-
-  let bestStreak = 0;
-  let runningStreak = 0;
-  let previousDate = null;
-
-  for (const checkIn of [...checkIns].reverse()) {
-    const currentDate = startOfUtcDay(checkIn.date);
-
-    if (previousDate && dateKey(currentDate) === dateKey(addDays(previousDate, 1))) {
-      runningStreak += 1;
-    } else {
-      runningStreak = 1;
-    }
-
-    bestStreak = Math.max(bestStreak, runningStreak);
-    previousDate = currentDate;
-  }
-
-  return prisma.habit.update({
-    where: { id: habitId },
-    data: { currentStreak, bestStreak },
-    include: {
-      checkIns: {
-        where: { date: { gte: addDays(startOfUtcDay(), -6) } },
-        orderBy: { date: 'asc' },
-      },
-    },
-  });
-}
-
 function mapHabit(habit) {
   const checkIns = habit.checkIns || [];
+  const today = startOfUtcDay();
+  const yesterday = addDays(today, -1);
+
+  const checkedDates = new Set(checkIns.map((checkIn) => dateKey(checkIn.date)));
+  const checkedToday = checkedDates.has(dateKey(today));
+  const checkedYesterday = checkedDates.has(dateKey(yesterday));
+
+  const currentStreak = (checkedToday || checkedYesterday) ? habit.currentStreak : 0;
 
   return {
     id: habit.id,
     title: habit.title,
     description: habit.description,
-    currentStreak: habit.currentStreak,
+    currentStreak,
     bestStreak: habit.bestStreak,
-    checkedInToday: checkIns.some((checkIn) => dateKey(checkIn.date) === dateKey(new Date())),
+    checkedInToday: checkedToday,
     weeklyProgress: weeklyProgress(checkIns),
   };
 }
@@ -199,21 +163,71 @@ async function checkInHabit(req, res, next) {
       return res.status(404).json({ message: 'Habit was not found.' });
     }
 
-    await prisma.habitCheckIn.upsert({
+    const today = startOfUtcDay();
+    const yesterday = addDays(today, -1);
+
+    const todayCheckIn = await prisma.habitCheckIn.findUnique({
       where: {
         habitId_date: {
           habitId: existingHabit.id,
-          date: startOfUtcDay(),
+          date: today,
         },
-      },
-      update: {},
-      create: {
-        habitId: existingHabit.id,
-        date: startOfUtcDay(),
       },
     });
 
-    const habit = await recalculateStreaks(existingHabit.id);
+    let habit = existingHabit;
+
+    if (!todayCheckIn) {
+      const yesterdayCheckIn = await prisma.habitCheckIn.findUnique({
+        where: {
+          habitId_date: {
+            habitId: existingHabit.id,
+            date: yesterday,
+          },
+        },
+      });
+
+      const checkedInYesterday = !!yesterdayCheckIn;
+      const currentStreak = checkedInYesterday ? existingHabit.currentStreak + 1 : 1;
+      const bestStreak = Math.max(existingHabit.bestStreak, currentStreak);
+
+      const [_, updatedHabit] = await prisma.$transaction([
+        prisma.habitCheckIn.upsert({
+          where: {
+            habitId_date: {
+              habitId: existingHabit.id,
+              date: today,
+            },
+          },
+          update: {},
+          create: {
+            habitId: existingHabit.id,
+            date: today,
+          },
+        }),
+        prisma.habit.update({
+          where: { id: existingHabit.id },
+          data: { currentStreak, bestStreak },
+          include: {
+            checkIns: {
+              where: { date: { gte: addDays(today, -6) } },
+              orderBy: { date: 'asc' },
+            },
+          },
+        }),
+      ]);
+      habit = updatedHabit;
+    } else {
+      habit = await prisma.habit.findUnique({
+        where: { id: existingHabit.id },
+        include: {
+          checkIns: {
+            where: { date: { gte: addDays(today, -6) } },
+            orderBy: { date: 'asc' },
+          },
+        },
+      });
+    }
 
     return res.status(200).json({ habit: mapHabit(habit) });
   } catch (error) {

@@ -116,8 +116,43 @@ async function profile(req, res, next) {
   }
 }
 
+async function googleLogin(req, res, next) {
+  try {
+    const { email, name, googleId } = req.body;
+
+    if (!email || !name) {
+      return res.status(400).json({ message: 'Email and name are required.' });
+    }
+
+    const emailLower = email.trim().toLowerCase();
+
+    // Check if user exists
+    let user = await prisma.user.findUnique({ where: { email: emailLower } });
+    if (!user) {
+      // Create a dummy password hash
+      const dummyPassword = 'oauth-google-' + (googleId || Math.random().toString(36).substring(7));
+      const passwordHash = await bcrypt.hash(dummyPassword, 12);
+      user = await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email: emailLower,
+          password: passwordHash,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      token: createToken(user),
+      user: sanitizeUser(user),
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   login,
   profile,
   register,
+  googleLogin,
 };

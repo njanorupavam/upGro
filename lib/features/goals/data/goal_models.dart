@@ -5,6 +5,7 @@ class GoalItem {
     required this.progress,
     this.description,
     this.targetDate,
+    this.motivationNote,
   });
 
   factory GoalItem.fromJson(Map<String, dynamic> json) {
@@ -16,6 +17,7 @@ class GoalItem {
           ? null
           : DateTime.parse(json['targetDate'] as String).toLocal(),
       progress: json['progress'] as int,
+      motivationNote: json['motivationNote'] as String?,
     );
   }
 
@@ -24,6 +26,8 @@ class GoalItem {
   final String? description;
   final DateTime? targetDate;
   final int progress;
+  /// Optional "Why I want this" motivation note shown on the goal card
+  final String? motivationNote;
 }
 
 class GoalDraft {
@@ -32,12 +36,14 @@ class GoalDraft {
     required this.progress,
     this.description,
     this.targetDate,
+    this.motivationNote,
   });
 
   final String title;
   final String? description;
   final DateTime? targetDate;
   final int progress;
+  final String? motivationNote;
 
   Map<String, dynamic> toJson() {
     return {
@@ -45,6 +51,7 @@ class GoalDraft {
       'description': description,
       'targetDate': targetDate?.toUtc().toIso8601String(),
       'progress': progress,
+      if (motivationNote != null) 'motivationNote': motivationNote,
     };
   }
 }

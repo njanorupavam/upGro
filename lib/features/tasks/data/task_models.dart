@@ -16,6 +16,28 @@ enum TaskPriority {
   }
 }
 
+/// Eisenhower matrix quadrants
+enum TaskQuadrant {
+  doFirst('Q1', 'Do First', 'Urgent + Important'),
+  schedule('Q2', 'Schedule', 'Not Urgent + Important'),
+  delegate('Q3', 'Delegate', 'Urgent + Not Important'),
+  eliminate('Q4', 'Eliminate', 'Not Urgent + Not Important');
+
+  const TaskQuadrant(this.code, this.label, this.description);
+
+  final String code;
+  final String label;
+  final String description;
+
+  static TaskQuadrant? fromCode(String? code) {
+    if (code == null) return null;
+    return TaskQuadrant.values.firstWhere(
+      (q) => q.code == code,
+      orElse: () => TaskQuadrant.doFirst,
+    );
+  }
+}
+
 enum TaskStatus {
   todo('TODO', 'To do'),
   inProgress('IN_PROGRESS', 'In progress'),
