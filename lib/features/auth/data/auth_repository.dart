@@ -45,16 +45,12 @@ class AuthRepository {
   }
 
   Future<AuthResult> googleLogin({
-    required String email,
-    required String name,
-    required String googleId,
+    required String idToken,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/auth/google',
       data: {
-        'email': email,
-        'name': name,
-        'googleId': googleId,
+        'idToken': idToken,
       },
     );
 

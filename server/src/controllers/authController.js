@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const prisma = require('../services/prisma');
 
 const tokenExpiry = '7d';
+const googleClient = new OAuth2Client();
 
 function sanitizeUser(user) {
   return {
@@ -29,6 +31,23 @@ function createToken(user) {
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function getGoogleAudiences() {
+  return (process.env.GOOGLE_CLIENT_ID || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+async function verifyGoogleToken(idToken) {
+  const audiences = getGoogleAudiences();
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: audiences.length === 1 ? audiences[0] : audiences,
+  });
+
+  return ticket.getPayload();
 }
 
 async function register(req, res, next) {
@@ -118,26 +137,41 @@ async function profile(req, res, next) {
 
 async function googleLogin(req, res, next) {
   try {
-    const { email, name, googleId } = req.body;
+    const { idToken } = req.body;
 
-    if (!email || !name) {
-      return res.status(400).json({ message: 'Email and name are required.' });
+    if (!idToken) {
+      return res.status(400).json({ message: 'Google ID token is required.' });
     }
 
-    const emailLower = email.trim().toLowerCase();
+    if (getGoogleAudiences().length === 0) {
+      return res.status(503).json({ message: 'Google Sign-In is not configured on the server.' });
+    }
 
-    // Check if user exists
+    const payload = await verifyGoogleToken(idToken);
+    const email = payload?.email?.trim().toLowerCase();
+    const name = payload?.name?.trim();
+
+    if (!email || !payload.email_verified) {
+      return res.status(401).json({ message: 'Google account verification failed.' });
+    }
+
+    const emailLower = email;
+
     let user = await prisma.user.findUnique({ where: { email: emailLower } });
     if (!user) {
-      // Create a dummy password hash
-      const dummyPassword = 'oauth-google-' + (googleId || Math.random().toString(36).substring(7));
+      const dummyPassword = `oauth-google-${payload.sub}`;
       const passwordHash = await bcrypt.hash(dummyPassword, 12);
       user = await prisma.user.create({
         data: {
-          name: name.trim(),
+          name: name || emailLower.split('@')[0],
           email: emailLower,
           password: passwordHash,
         },
+      });
+    } else if (name && user.name !== name) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { name },
       });
     }
 

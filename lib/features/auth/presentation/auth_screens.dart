@@ -1,5 +1,7 @@
 import 'package:dayforge/core/presentation/dayforge_ui.dart';
 import 'package:dayforge/features/auth/presentation/auth_controller.dart';
+import 'package:dayforge/features/auth/presentation/google_sign_in_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -104,34 +106,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: auth.isLoading ? null : () => _showGoogleChooser(context),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: BorderSide(color: context.dayforgeBorder),
-                backgroundColor: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.white,
-                foregroundColor: context.dayforgeText,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png',
-                    width: 18,
-                    height: 18,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.g_mobiledata, size: 22, color: Colors.blue);
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Sign in with Google',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
+            GoogleSignInSection(
+              isRegister: false,
+              isLoading: auth.isLoading,
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -142,18 +119,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _showGoogleChooser(BuildContext context) async {
-    final success = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const GoogleAccountChooserDialog(),
-    );
-
-    if (success == true && mounted) {
-      context.go('/profile');
-    }
   }
 
   Future<void> _submit() async {
@@ -285,34 +250,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: auth.isLoading ? null : () => _showGoogleChooser(context),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: BorderSide(color: context.dayforgeBorder),
-                backgroundColor: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.white,
-                foregroundColor: context.dayforgeText,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png',
-                    width: 18,
-                    height: 18,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.g_mobiledata, size: 22, color: Colors.blue);
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Sign up with Google',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
+            GoogleSignInSection(
+              isRegister: true,
+              isLoading: auth.isLoading,
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -323,18 +263,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _showGoogleChooser(BuildContext context) async {
-    final success = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const GoogleAccountChooserDialog(),
-    );
-
-    if (success == true && mounted) {
-      context.go('/profile');
-    }
   }
 
   Future<void> _submit() async {
@@ -573,278 +501,63 @@ String? _requiredPassword(String? value) {
   return null;
 }
 
-class GoogleAccountChooserDialog extends ConsumerStatefulWidget {
-  const GoogleAccountChooserDialog({super.key});
+class GoogleSignInSection extends ConsumerWidget {
+  const GoogleSignInSection({
+    required this.isRegister,
+    required this.isLoading,
+    super.key,
+  });
+
+  final bool isRegister;
+  final bool isLoading;
 
   @override
-  ConsumerState<GoogleAccountChooserDialog> createState() => _GoogleAccountChooserDialogState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final darkMode = Theme.of(context).brightness == Brightness.dark;
 
-class _GoogleAccountChooserDialogState extends ConsumerState<GoogleAccountChooserDialog> {
-  bool _useCustom = false;
-  bool _isLoading = false;
-  String? _errorMessage;
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: DayForgeCard(
-        padding: const EdgeInsets.all(24),
-        child: SizedBox(
-          width: 380,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png',
-                    width: 24,
-                    height: 24,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, size: 28, color: Colors.blue),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Google Sign In',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: context.dayforgeText,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose an account to continue to Upgro',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: context.dayforgeMuted,
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (_isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (!_useCustom) ...[
-                _buildAccountTile(
-                  name: 'John Doe',
-                  email: 'john.doe@gmail.com',
-                  avatarColor: Colors.blue.shade600,
-                  avatarText: 'JD',
-                ),
-                const SizedBox(height: 10),
-                _buildAccountTile(
-                  name: 'Jane Smith',
-                  email: 'jane.smith@gmail.com',
-                  avatarColor: Colors.purple.shade600,
-                  avatarText: 'JS',
-                ),
-                const SizedBox(height: 14),
-                const Divider(),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: () => setState(() => _useCustom = true),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Use another account'),
-                ),
-              ] else ...[
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                        validator: _requiredText,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.mail_outline),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: _requiredEmail,
-                      ),
-                      const SizedBox(height: 18),
-                      if (_errorMessage != null) ...[
-                        Text(
-                          _errorMessage!,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => setState(() {
-                              _useCustom = false;
-                              _errorMessage = null;
-                            }),
-                            child: const Text('Back'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: _submitCustom,
-                            child: const Text('Sign in'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              if (_errorMessage != null && !_useCustom && !_isLoading) ...[
-                const SizedBox(height: 12),
-                Text(
-                  _errorMessage!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
-                ),
-              ],
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: _isLoading ? null : () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-            ],
+    if (kIsWeb) {
+      return Center(
+        child: Opacity(
+          opacity: isLoading ? 0.7 : 1,
+          child: IgnorePointer(
+            ignoring: isLoading,
+            child: buildGoogleSignInWebButton(
+              darkMode: darkMode,
+              isRegister: isRegister,
+            ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildAccountTile({
-    required String name,
-    required String email,
-    required Color avatarColor,
-    required String avatarText,
-  }) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: () => _signIn(name: name, email: email),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: context.dayforgeBorder.withOpacity(0.5)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: avatarColor,
-              radius: 18,
-              child: Text(
-                avatarText,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.dayforgeText,
-                    ),
-                  ),
-                  Text(
-                    email,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: context.dayforgeMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: context.dayforgeMuted,
-              size: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _signIn({required String name, required String email}) async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    if (!mounted) return;
-
-    final googleId = 'google_sim_${email.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}';
-
-    try {
-      final success = await ref.read(authControllerProvider.notifier).loginWithGoogle(
-        email: email,
-        name: name,
-        googleId: googleId,
-      );
-
-      if (!mounted) return;
-
-      if (success) {
-        Navigator.pop(context, true);
-      } else {
-        final authState = ref.read(authControllerProvider);
-        setState(() {
-          _isLoading = false;
-          _errorMessage = authState.errorMessage ?? 'Sign in failed. Please try again.';
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'An unexpected error occurred.';
-        });
-      }
-    }
-  }
-
-  void _submitCustom() {
-    if (_formKey.currentState!.validate()) {
-      _signIn(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
       );
     }
+
+    return OutlinedButton(
+      onPressed: isLoading
+          ? null
+          : () => ref.read(authControllerProvider.notifier).startGoogleSignIn(),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: BorderSide(color: context.dayforgeBorder),
+        backgroundColor: darkMode ? Colors.white.withOpacity(0.05) : Colors.white,
+        foregroundColor: context.dayforgeText,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.network(
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png',
+            width: 18,
+            height: 18,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.g_mobiledata, size: 22, color: Colors.blue);
+            },
+          ),
+          const SizedBox(width: 10),
+          Text(
+            isRegister ? 'Sign up with Google' : 'Sign in with Google',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
   }
 }
