@@ -38,8 +38,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong.' });
 });
 
-app.listen(port, () => {
-  console.log(`DayForge API running on port ${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`DayForge API running on port ${port}`);
+  });
+}
 
 module.exports = app;
