@@ -9,7 +9,7 @@
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "build": "prisma generate"
+    "build": "prisma generate --schema=prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
